@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { ArrowDownRightIcon } from "lucide-react"
 
 import { PhonePreview } from "@/components/home/phone-preview"
 import { SectionMesh } from "@/components/layout/section-mesh"
@@ -101,23 +100,22 @@ export function Hero() {
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
-              href="#shops"
+              href="/connexion"
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "h-11 rounded-xl px-5 text-base"
               )}
             >
-              Trouver un shop
+              Déposer un appareil
             </Link>
             <Link
-              href="#comment-ca-marche"
+              href="/connexion"
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "h-11 rounded-xl px-5 text-base"
               )}
             >
-              Comment ça marche
-              <ArrowDownRightIcon className="size-4" />
+              Connexion
             </Link>
           </div>
         </div>

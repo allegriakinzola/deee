@@ -16,10 +16,10 @@ import {
 import { cn } from "@/lib/utils"
 
 const NAV = [
-  { href: "#comment-ca-marche", label: "Comment ça marche" },
-  { href: "#catalogue", label: "Catalogue" },
-  { href: "#points", label: "Points" },
-  { href: "#shops", label: "Shops" },
+  { href: "/#comment-ca-marche", label: "Comment ça marche" },
+  { href: "/#catalogue", label: "Catalogue" },
+  { href: "/#points", label: "Points" },
+  { href: "/#shops", label: "Shops" },
 ]
 
 export function SiteHeader() {
@@ -42,16 +42,16 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-2 lg:flex">
           <Link
-            href="#shops"
+            href="/connexion"
             className={cn(buttonVariants({ variant: "ghost", size: "lg" }))}
           >
-            Trouver un shop
+            Connexion
           </Link>
           <Link
-            href="#comment-ca-marche"
+            href="/inscription"
             className={cn(buttonVariants({ size: "lg" }))}
           >
-            Déposer un appareil
+            Créer un compte
           </Link>
         </div>
 
@@ -89,18 +89,18 @@ export function SiteHeader() {
             </nav>
             <div className="mt-4 flex flex-col gap-2 px-4">
               <Link
-                href="#shops"
+                href="/connexion"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" })
                 )}
               >
-                Trouver un shop
+                Connexion
               </Link>
               <Link
-                href="#comment-ca-marche"
+                href="/inscription"
                 className={cn(buttonVariants({ size: "lg" }))}
               >
-                Déposer un appareil
+                Créer un compte
               </Link>
             </div>
           </SheetContent>

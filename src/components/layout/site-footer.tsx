@@ -13,28 +13,43 @@ export function SiteFooter() {
             contribuez au recyclage.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-8 text-sm">
+        <div className="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
           <div>
             <p className="font-medium">Parcours</p>
             <ul className="mt-3 space-y-2 text-muted-foreground">
               <li>
-                <a href="#comment-ca-marche" className="hover:text-foreground">
+                <a href="/#comment-ca-marche" className="hover:text-foreground">
                   Comment ça marche
                 </a>
               </li>
               <li>
-                <a href="#catalogue" className="hover:text-foreground">
+                <a href="/#catalogue" className="hover:text-foreground">
                   Catalogue
                 </a>
               </li>
               <li>
-                <a href="#shops" className="hover:text-foreground">
+                <a href="/#shops" className="hover:text-foreground">
                   Shops
                 </a>
               </li>
               <li>
-                <a href="#partenaires" className="hover:text-foreground">
+                <a href="/#partenaires" className="hover:text-foreground">
                   Partenaires
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="font-medium">Compte</p>
+            <ul className="mt-3 space-y-2 text-muted-foreground">
+              <li>
+                <a href="/connexion" className="hover:text-foreground">
+                  Connexion
+                </a>
+              </li>
+              <li>
+                <a href="/inscription" className="hover:text-foreground">
+                  Créer un compte
                 </a>
               </li>
             </ul>
