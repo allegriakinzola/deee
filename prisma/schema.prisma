@@ -1,0 +1,180 @@
+// Identité, accès, partenaires, shops.
+// Dépôts et ledger s’ajoutent ici quand leur module est ouvert.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum IdentityType {
+  EMAIL
+  PHONE
+}
+
+enum UserRole {
+  CITIZEN
+  SHOP_STAFF
+  PARTNER_ADMIN
+  GVB_ADMIN
+  GVB_COLLECTOR
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum PartnerKind {
+  TELECOM
+  BANK
+  PRODUCTS
+}
+
+enum PartnerStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ShopStatus {
+  ACTIVE
+  DISABLED
+}
+
+model User {
+  id          String     @id @default(cuid())
+  displayName String
+  role        UserRole
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  identities Identity[]
+  credential Credential?
+  sessions   Session[]
+  invitations Invitation[]
+  sentInvitations Invitation[] @relation("InvitationSender")
+  partnerMemberships PartnerMembership[]
+  shopMembership     ShopMembership?
+}
+
+/// Canal de connexion. Unique par (type, valeur normalisée).
+/// Ajouter PHONE plus tard = une ligne, pas un nouveau modèle User.
+model Identity {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       IdentityType
+  value      String
+  verifiedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  @@unique([type, value])
+  @@index([userId])
+}
+
+/// Séparé de User : un compte invité peut exister avant d’avoir un mot de passe.
+model Credential {
+  userId       String   @id
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  updatedAt    DateTime @updatedAt
+}
+
+/// Le cookie ne contient que le jeton brut. Ici on stocke le hash.
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Invitation à rejoindre la plateforme. Le jeton brut n’est jamais stocké.
+/// Un compte User existe dès l’invitation ; le mot de passe arrive à l’acceptation.
+model Invitation {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitedById String
+  invitedBy   User      @relation("InvitationSender", fields: [invitedById], references: [id], onDelete: Restrict)
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Entreprise partenaire (télécom, banque, produits). La GVB la crée.
+model Partner {
+  id        String        @id @default(cuid())
+  name      String
+  shortName String
+  slug      String        @unique
+  kind      PartnerKind
+  logo      String?
+  status    PartnerStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  memberships PartnerMembership[]
+  shops       Shop[]
+
+  @@index([kind])
+  @@index([status])
+}
+
+/// Lien User ↔ Partner. Un PARTNER_ADMIN appartient à une entreprise.
+model PartnerMembership {
+  id        String   @id @default(cuid())
+  partnerId String
+  partner   Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([partnerId, userId])
+  @@index([userId])
+}
+
+/// Point de dépôt. Appartient à un partenaire. Un seul compte (SHOP_STAFF).
+model Shop {
+  id        String     @id @default(cuid())
+  partnerId String
+  partner   Partner    @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  name      String
+  slug      String
+  area      String
+  lat       Float
+  lng       Float
+  status    ShopStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  membership ShopMembership?
+
+  @@unique([partnerId, slug])
+  @@index([partnerId])
+  @@index([status])
+}
+
+/// Un shop = un login. Le responsable ne gère pas d’autres comptes.
+model ShopMembership {
+  id        String   @id @default(cuid())
+  shopId    String   @unique
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}

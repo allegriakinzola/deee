@@ -80,7 +80,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${sans.variable} h-full scroll-smooth`}>
-      <body className="min-h-full flex flex-col bg-background font-sans text-foreground antialiased">
+      <body className="flex h-full min-h-full flex-col bg-background font-sans text-foreground antialiased">
         <JsonLd />
         {children}
       </body>

@@ -1,52 +1,59 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
-import { ArrowRightIcon, CheckIcon, EyeIcon, EyeOffIcon } from "lucide-react"
+import { ArrowRightIcon, EyeIcon, EyeOffIcon } from "lucide-react"
 
+import { postJson } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Field, Input } from "@/components/ui/input"
 
 export function LoginForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const created = searchParams.get("created") === "1"
   const [showPassword, setShowPassword] = useState(false)
-  const [phone, setPhone] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [pending, setPending] = useState(false)
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!phone.trim() || !password.trim()) {
-      setError("Indiquez votre numéro et votre mot de passe.")
+    if (!identifier.trim() || !password) {
+      setError("Indiquez votre e-mail et votre mot de passe.")
       return
     }
+
     setError("")
-    router.push("/connexion")
+    setPending(true)
+
+    const result = await postJson<{ redirectTo: string }>("/api/v1/auth/login", {
+      identifier,
+      password,
+    })
+
+    setPending(false)
+
+    if (!result.ok) {
+      setError(result.message)
+      return
+    }
+
+    router.push(result.data.redirectTo)
+    router.refresh()
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {created ? (
-        <p className="flex items-start gap-2.5 rounded-2xl bg-primary/35 px-4 py-3.5 text-sm leading-relaxed">
-          <CheckIcon className="mt-0.5 size-4 shrink-0" />
-          Votre compte a été créé. Connectez-vous avec votre numéro et votre mot
-          de passe.
-        </p>
-      ) : null}
-
-      <Field label="Numéro de téléphone" htmlFor="phone">
+      <Field label="E-mail" htmlFor="identifier">
         <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="+243 81 000 00 00"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
+          id="identifier"
+          name="identifier"
+          type="email"
+          autoComplete="email"
+          placeholder="vous@exemple.com"
+          value={identifier}
+          onChange={(event) => setIdentifier(event.target.value)}
         />
       </Field>
 
@@ -81,8 +88,12 @@ export function LoginForm() {
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <Button type="submit" className="h-12 w-full rounded-2xl text-base">
-        Se connecter
+      <Button
+        type="submit"
+        disabled={pending}
+        className="h-12 w-full rounded-2xl text-base"
+      >
+        {pending ? "Connexion…" : "Se connecter"}
         <ArrowRightIcon className="size-4" />
       </Button>
 

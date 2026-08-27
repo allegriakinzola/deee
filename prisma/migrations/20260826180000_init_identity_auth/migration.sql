@@ -1,0 +1,2 @@
+-- Intentionally empty.
+-- The identity/auth schema was already applied by 20260826181729_init_identity_auth.
