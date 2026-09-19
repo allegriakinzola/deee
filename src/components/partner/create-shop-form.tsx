@@ -12,6 +12,7 @@ import type { ShopInvitationResult } from "@/modules/shops"
 export type ShopCreated = {
   id: string
   name: string
+  code: string
   invitation: ShopInvitationResult | null
 }
 

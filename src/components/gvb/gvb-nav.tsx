@@ -4,6 +4,7 @@ import {
   Building2Icon,
   LayoutDashboardIcon,
   RecycleIcon,
+  SettingsIcon,
   SparklesIcon,
   StoreIcon,
   TagsIcon,
@@ -18,10 +19,11 @@ const ITEMS = [
   { href: "/admin/utilisateurs", label: "Utilisateurs", icon: UserCogIcon },
   { href: "/admin/partenaires", label: "Partenaires", icon: Building2Icon },
   { href: "/admin/shops", label: "Shops", icon: StoreIcon },
-  { href: "/admin/catalogue", label: "Catalogue", icon: TagsIcon, soon: true },
+  { href: "/admin/materiels", label: "Matériels", icon: TagsIcon },
   { href: "/admin/depots", label: "Dépôts", icon: RecycleIcon, soon: true },
   { href: "/admin/echanges", label: "Échanges", icon: SparklesIcon, soon: true },
   { href: "/admin/collectes", label: "Collectes", icon: TruckIcon, soon: true },
+  { href: "/admin/parametres", label: "Paramètres", icon: SettingsIcon },
 ] as const
 
 export function GvbNav({ variant }: { variant: "side" | "mobile" }) {

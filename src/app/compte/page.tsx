@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { CitizenHome } from "@/components/citizen/citizen-home"
 import { canAccessCitizenSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
+import { getCitizenBalance } from "@/modules/ledger"
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -19,5 +20,13 @@ export default async function CitizenHomePage() {
     redirect("/interdit")
   }
 
-  return <CitizenHome displayName={user.displayName} />
+  const balance = await getCitizenBalance(user)
+
+  return (
+    <CitizenHome
+      displayName={user.displayName}
+      points={balance.points}
+      lastDeposit={balance.lastDeposit}
+    />
+  )
 }

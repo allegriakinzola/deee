@@ -9,21 +9,27 @@ export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 
 export type ImageExtension = "jpg" | "png" | "webp"
 
-export function inspectImage(bytes: Buffer): { ext: ImageExtension } {
+export function inspectImage(
+  bytes: Buffer,
+  noun: "image" | "logo" = "image"
+): { ext: ImageExtension } {
+  const empty =
+    noun === "logo" ? "Le fichier logo est vide." : "Le fichier image est vide."
+  const tooBig =
+    noun === "logo"
+      ? "Le logo doit faire 2 Mo maximum."
+      : "L’image doit faire 2 Mo maximum."
+  const badType =
+    noun === "logo"
+      ? "Envoyez un logo JPEG, PNG ou WebP."
+      : "Envoyez une image JPEG, PNG ou WebP."
+
   if (bytes.length === 0) {
-    throw new AppError(
-      ErrorCode.VALIDATION,
-      400,
-      "Le fichier logo est vide."
-    )
+    throw new AppError(ErrorCode.VALIDATION, 400, empty)
   }
 
   if (bytes.length > MAX_UPLOAD_BYTES) {
-    throw new AppError(
-      ErrorCode.VALIDATION,
-      400,
-      "Le logo doit faire 2 Mo maximum."
-    )
+    throw new AppError(ErrorCode.VALIDATION, 400, tooBig)
   }
 
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
@@ -46,11 +52,7 @@ export function inspectImage(bytes: Buffer): { ext: ImageExtension } {
     return { ext: "webp" }
   }
 
-  throw new AppError(
-    ErrorCode.VALIDATION,
-    400,
-    "Envoyez un logo JPEG, PNG ou WebP."
-  )
+  throw new AppError(ErrorCode.VALIDATION, 400, badType)
 }
 
 export async function writePublicUpload(input: {

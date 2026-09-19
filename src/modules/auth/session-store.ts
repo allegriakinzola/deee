@@ -21,6 +21,7 @@ export const shopMembershipInclude = {
         select: {
           id: true,
           name: true,
+          code: true,
           status: true,
           partner: {
             select: { id: true, name: true, logo: true, status: true },
@@ -49,6 +50,7 @@ type UserWithIdentities = {
     shop: {
       id: string
       name: string
+      code: string
       status: "ACTIVE" | "DISABLED"
       partner: {
         id: string
@@ -96,6 +98,7 @@ export function toAuthUser(user: UserWithIdentities): AuthUser {
           : null,
     shopId: user.role === "SHOP_STAFF" && shopReady ? shop.id : null,
     shopName: user.role === "SHOP_STAFF" && shopReady ? shop.name : null,
+    shopCode: user.role === "SHOP_STAFF" && shopReady ? shop.code : null,
   }
 }
 

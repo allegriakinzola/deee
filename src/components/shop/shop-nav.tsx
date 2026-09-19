@@ -10,7 +10,7 @@ import { SpaceNav } from "@/components/workspace/space-nav"
 
 const ITEMS = [
   { href: "/shop", label: "Tableau de bord", icon: LayoutDashboardIcon },
-  { href: "/shop/depots", label: "Dépôts", icon: RecycleIcon, soon: true },
+  { href: "/shop/depots", label: "Dépôts", icon: RecycleIcon },
   { href: "/shop/echanges", label: "Échanges", icon: SparklesIcon, soon: true },
 ] as const
 

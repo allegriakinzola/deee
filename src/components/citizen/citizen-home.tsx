@@ -2,7 +2,6 @@ import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import {
   MapPinIcon,
-  QrCodeIcon,
   RecycleIcon,
   SmartphoneIcon,
   SparklesIcon,
@@ -12,7 +11,19 @@ import { SHOPS } from "@/lib/shops"
 
 const NEAREST = SHOPS.find((shop) => shop.id === "vodacom-gombe") ?? SHOPS[0]
 
-export function CitizenHome({ displayName }: { displayName: string }) {
+export function CitizenHome({
+  displayName,
+  points,
+  lastDeposit,
+}: {
+  displayName: string
+  points: number
+  lastDeposit: {
+    shopName: string
+    points: number
+    confirmedAt: string
+  } | null
+}) {
   const firstName = displayName.trim().split(/\s+/)[0] || displayName
 
   return (
@@ -21,16 +32,18 @@ export function CitizenHome({ displayName }: { displayName: string }) {
         <p className="text-[11px] font-medium tracking-wide uppercase lg:text-xs">
           Mon solde
         </p>
-        <p className="mt-3 text-sm font-medium leading-relaxed lg:text-base">
-          En attente d’alimentation des données
+        <p className="mt-3 text-3xl font-semibold tracking-tight lg:text-4xl">
+          {points} pts
         </p>
         <p className="mt-2 text-[13px] opacity-80 lg:text-sm">
-          Vos points apparaîtront ici, {firstName}.
+          {points === 0
+            ? `Déposez un appareil en shop pour créditer votre compte, ${firstName}.`
+            : `Vos points sont utilisables en shop, ${firstName}.`}
         </p>
       </section>
 
       <div className="grid grid-cols-4 gap-2 lg:gap-4">
-        <QuickAction icon={QrCodeIcon} label="Déposer" soon />
+        <QuickAction href="/compte/depot" icon={RecycleIcon} label="Déposer" />
         <QuickAction href="/compte/shops" icon={MapPinIcon} label="Shops" />
         <QuickAction icon={SmartphoneIcon} label="Catalogue" soon />
         <QuickAction icon={SparklesIcon} label="Échanger" soon />
@@ -45,9 +58,20 @@ export function CitizenHome({ displayName }: { displayName: string }) {
             <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/50 text-primary-foreground lg:size-12">
               <RecycleIcon className="size-5 lg:size-6" />
             </span>
-            <p className="text-sm text-zinc-500 lg:text-base">
-              En attente d’alimentation des données
-            </p>
+            {lastDeposit ? (
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-zinc-900 lg:text-base">
+                  {lastDeposit.shopName}
+                </p>
+                <p className="text-[12px] text-zinc-500 lg:text-sm">
+                  +{lastDeposit.points} pts
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-zinc-500 lg:text-base">
+                Aucun dépôt confirmé pour l’instant.
+              </p>
+            )}
           </div>
         </section>
 

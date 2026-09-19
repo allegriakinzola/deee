@@ -13,6 +13,7 @@ import {
 } from "@/components/shops/shop-copy"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { displayShopCode } from "@/lib/shop-code"
 import type { DirectoryShop } from "@/modules/shops"
 
 export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
@@ -89,6 +90,9 @@ export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
                 </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">Shop</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  Code
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
                   Commune
                 </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
@@ -103,7 +107,7 @@ export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
               {visible.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-16 text-center text-muted-foreground"
                   >
                     Aucun shop pour l’instant.
@@ -126,6 +130,9 @@ export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
                     </td>
                     <td className="px-4 py-3 font-medium whitespace-nowrap">
                       {shop.name}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-sm tracking-wider whitespace-nowrap">
+                      {displayShopCode(shop.code)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">{shop.area}</td>
                     <td className="px-4 py-3 whitespace-nowrap">

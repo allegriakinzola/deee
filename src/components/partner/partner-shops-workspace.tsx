@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 
 import { deleteJson, patchJson, postJson } from "@/lib/api"
+import { displayShopCode } from "@/lib/shop-code"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
 import {
   CreateShopForm,
@@ -64,7 +65,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
   const [editTarget, setEditTarget] = useState<DirectoryShop | null>(null)
   const [inviteTarget, setInviteTarget] = useState<DirectoryShop | null>(null)
   const [invited, setInvited] = useState<ShopInvitationResult | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [copiedValue, setCopiedValue] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<DirectoryShop | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [pendingAction, setPendingAction] = useState<PendingAction>(null)
@@ -81,8 +82,8 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
 
   async function copyText(value: string) {
     await navigator.clipboard.writeText(value)
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 2000)
+    setCopiedValue(value)
+    window.setTimeout(() => setCopiedValue(null), 2000)
   }
 
   async function setStatus(shop: DirectoryShop, status: "ACTIVE" | "DISABLED") {
@@ -227,6 +228,9 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
               <tr>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">Shop</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  Code
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
                   Commune
                 </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
@@ -244,7 +248,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
               {visible.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-16 text-center text-muted-foreground"
                   >
                     Aucun shop ne correspond à cette vue.
@@ -263,6 +267,9 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
                         <p className="text-xs text-muted-foreground">
                           {shop.lat.toFixed(4)}, {shop.lng.toFixed(4)}
                         </p>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-sm tracking-wider whitespace-nowrap">
+                        {displayShopCode(shop.code)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {shop.area}
@@ -329,8 +336,9 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
             {created ? (
               <InviteResult
                 title={created.name}
+                shopCode={created.code}
                 invitation={created.invitation}
-                copied={copied}
+                copiedValue={copiedValue}
                 onCopy={copyText}
                 onReset={() => setCreated(null)}
                 resetLabel="Créer un autre shop"
@@ -391,7 +399,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
               <InviteResult
                 title={inviteTarget?.name ?? ""}
                 invitation={invited}
-                copied={copied}
+                copiedValue={copiedValue}
                 onCopy={copyText}
                 onReset={() => {
                   setInvited(null)
@@ -509,24 +517,46 @@ function ShopRowMenu({
 
 function InviteResult({
   title,
+  shopCode,
   invitation,
-  copied,
+  copiedValue,
   onCopy,
   onReset,
   resetLabel,
 }: {
   title: string
+  shopCode?: string
   invitation: ShopInvitationResult | null
-  copied: boolean
+  copiedValue: string | null
   onCopy: (value: string) => void
   onReset: () => void
   resetLabel: string
 }) {
+  const shownCode = shopCode ? displayShopCode(shopCode) : null
   return (
     <div className="space-y-4 pt-2">
       <p className="text-sm">
         <span className="font-medium">{title}</span> est enregistré.
       </p>
+      {shownCode ? (
+        <div className="rounded-2xl bg-muted/70 px-4 py-3">
+          <p className="text-xs text-muted-foreground">
+            Code à communiquer au citoyen
+          </p>
+          <p className="mt-1 font-mono text-2xl font-semibold tracking-[0.18em]">
+            {shownCode}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 h-10 w-full rounded-2xl"
+            onClick={() => onCopy(shownCode)}
+          >
+            <CopyIcon className="size-4" />
+            {copiedValue === shownCode ? "Code copié" : "Copier le code"}
+          </Button>
+        </div>
+      ) : null}
       {invitation ? (
         <>
           <p className="text-sm">
@@ -542,7 +572,9 @@ function InviteResult({
             onClick={() => onCopy(invitation.invitationUrl)}
           >
             <CopyIcon className="size-4" />
-            {copied ? "Lien copié" : "Copier le lien"}
+            {copiedValue === invitation.invitationUrl
+              ? "Lien copié"
+              : "Copier le lien"}
           </Button>
         </>
       ) : (

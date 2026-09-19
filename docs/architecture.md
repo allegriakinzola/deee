@@ -57,8 +57,8 @@ Un passage d’état métier se fait **dans une transaction SQL**, jamais dans R
 | `GVB_ADMIN` | `/admin` | Ouvert |
 | `GVB_COLLECTOR` | `/collecte` | Pas encore |
 | `PARTNER_ADMIN` | `/partenaire` | Ouvert (accueil, utilisateurs, shops) |
-| `SHOP_STAFF` | `/shop` | Ouvert (accueil) |
-| `CITIZEN` | `/compte` | Ouvert (accueil, shops, profil) |
+| `SHOP_STAFF` | `/shop` | Ouvert (accueil, dépôts) |
+| `CITIZEN` | `/compte` | Ouvert (accueil, dépôt, shops, profil) |
 
 Un seul `/connexion`. Après login, `homePathFor(role)` envoie vers l’espace. Les espaces non ouverts tombent sur `/interdit`.
 
@@ -68,7 +68,11 @@ L’espace citoyen est **responsive**. Sur téléphone, c’est une app (barre d
 
 La GVB n’est pas un partenaire. C’est l’opérateur de la plateforme. Un `GVB_ADMIN` n’appartient pas à un shop.
 
-Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) ; le responsable ne gère pas d’utilisateurs. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique (`lib/shops.ts`) reste statique.
+Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) et un **code unique** (6 caractères, affiché `ABC-DEF`). Le responsable le communique au citoyen au comptoir. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique (`lib/shops.ts`) reste statique.
+
+Les **matériels** sont gérés par la GVB (`/admin/materiels`), sans catalogue intermédiaire. La catégorie est précodée ; le nom et les points sont en base. Les points se convertissent en USD, puis en **bons**. La valeur d’un bon se règle dans **Paramètres** (`/admin/parametres`) : **1 bon = 10 USD** par défaut.
+
+Un **dépôt** suit : brouillon citoyen (`DRAFT`) → envoi au shop via le code (`SENT`) → confirmation ou refus du responsable. Les points ne sont crédités au citoyen **qu’à la confirmation**, dans la même transaction SQL que le passage à `CONFIRMED` (`LedgerEntry` / `DEPOSIT_CREDIT`). Le shop n’est pas crédité au dépôt.
 
 ## API
 
@@ -86,9 +90,11 @@ Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_ST
 | `auth` | Mot de passe, session, login / logout |
 | `access` | Où chaque rôle atterrit, qui entre où |
 | `partners` | Entreprises partenaires, équipe administrateurs |
-| `shops` | Points de dépôt (créés par le partenaire ; GVB consulte) |
-| `catalog` | Barème pièces (plus tard) |
-| `deposits` | Demandes de dépôt + confirmation shop |
+| `shops` | Points de dépôt (créés par le partenaire ; code unique ; GVB consulte) |
+| `catalog` | Conversion points ↔ USD / bons |
+| `materials` | Matériels DEEE (GVB) |
+| `settings` | Réglages opérateur ; valeur d’un bon |
+| `deposits` | Demandes de dépôt (brouillon, envoi par code shop, confirmation) |
 | `redeems` | Demandes d’échange + confirmation shop |
 | `ledger` | Points, écritures, transactions SQL |
 | `collections` | Tournées collecteur (plus tard) |
@@ -110,6 +116,6 @@ npm run db:deploy
 npm run db:seed
 ```
 
-Le seed crée (ou met à jour) l’administrateur GVB à partir de `GVB_ADMIN_EMAIL` et `GVB_ADMIN_PASSWORD`.
+Le seed crée (ou met à jour) l’administrateur GVB à partir de `GVB_ADMIN_EMAIL` et `GVB_ADMIN_PASSWORD`, les **paramètres opérateur** (1 bon = 10 USD) s’ils n’existent pas, et les **matériels** DEEE manquants (noms groupés avec `/` retirés).
 
 Un `docker-compose.yml` existe en repli local ; le projet se développe contre Neon.

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 
 const TABS = [
   { href: "/compte", label: "Accueil", icon: HouseIcon, exact: true },
-  { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon, soon: true },
+  { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
   { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
   { href: "/compte/profil", label: "Compte", icon: UserIcon },
 ] as const
@@ -24,7 +24,7 @@ const SIDE = [
   { href: "/compte", label: "Accueil", icon: HouseIcon, exact: true },
   { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
   { href: "/compte/profil", label: "Compte", icon: UserIcon },
-  { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon, soon: true },
+  { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
   {
     href: "/compte/catalogue",
     label: "Catalogue",

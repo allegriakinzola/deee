@@ -1,5 +1,4 @@
-// Identité, accès, partenaires, shops.
-// Dépôts et ledger s’ajoutent ici quand leur module est ouvert.
+// Identité, accès, partenaires, shops, matériels, dépôts, ledger, réglages opérateur.
 
 generator client {
   provider = "prisma-client"
@@ -44,6 +43,22 @@ enum ShopStatus {
   DISABLED
 }
 
+enum CatalogStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum DepositStatus {
+  DRAFT
+  SENT
+  CONFIRMED
+  REJECTED
+}
+
+enum LedgerKind {
+  DEPOSIT_CREDIT
+}
+
 model User {
   id          String     @id @default(cuid())
   displayName String
@@ -59,6 +74,9 @@ model User {
   sentInvitations Invitation[] @relation("InvitationSender")
   partnerMemberships PartnerMembership[]
   shopMembership     ShopMembership?
+  citizenDeposits    Deposit[]      @relation("DepositCitizen")
+  confirmedDeposits  Deposit[]      @relation("DepositConfirmer")
+  ledgerEntries      LedgerEntry[]
 }
 
 /// Canal de connexion. Unique par (type, valeur normalisée).
@@ -155,6 +173,7 @@ model Shop {
   partner   Partner    @relation(fields: [partnerId], references: [id], onDelete: Cascade)
   name      String
   slug      String
+  code      String     @unique
   area      String
   lat       Float
   lng       Float
@@ -163,6 +182,7 @@ model Shop {
   updatedAt DateTime   @updatedAt
 
   membership ShopMembership?
+  deposits   Deposit[]
 
   @@unique([partnerId, slug])
   @@index([partnerId])
@@ -177,4 +197,122 @@ model ShopMembership {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+/// Configuration opérateur GVB. Une seule ligne (id = "gvb").
+/// La valeur d’un bon est globale : elle ne se règle pas par catalogue.
+model OperatorSettings {
+  id          String   @id
+  bonUsdValue Decimal  @db.Decimal(10, 2)
+  updatedAt   DateTime @updatedAt
+}
+
+/// Barème GVB. Les points d’un article se convertissent en USD, puis en bons
+/// via OperatorSettings.bonUsdValue. Les citoyens échangeront des bons en shop.
+model Catalog {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  usdPerPoint Decimal       @db.Decimal(10, 4)
+  status      CatalogStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  items CatalogItem[]
+
+  @@index([status])
+}
+
+/// Matériel accepté au dépôt. La catégorie est précodée ; le nom et les points
+/// sont enregistrés en base.
+model CatalogItem {
+  id          String        @id @default(cuid())
+  catalogId   String
+  catalog     Catalog       @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  category    String
+  name        String
+  description String?
+  unit        String        @default("Pièce")
+  points      Int
+  remarks     String?
+  status      CatalogStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([catalogId, category, name])
+  @@index([catalogId])
+  @@index([category])
+}
+
+/// Matériel du barème, géré directement (sans catalogue).
+model Material {
+  id        String        @id @default(cuid())
+  category  String
+  name      String
+  image     String
+  unit      String        @default("Pièce")
+  points    Int
+  remarks   String?
+  status    CatalogStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([category, name])
+  @@index([category])
+  @@index([status])
+
+  depositLines DepositLine[]
+}
+
+/// Demande de dépôt. Les points ne sont crédités qu’à la confirmation shop.
+model Deposit {
+  id            String        @id @default(cuid())
+  citizenId     String
+  citizen       User          @relation("DepositCitizen", fields: [citizenId], references: [id], onDelete: Restrict)
+  shopId        String?
+  shop          Shop?         @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  status        DepositStatus @default(DRAFT)
+  sentAt        DateTime?
+  confirmedAt   DateTime?
+  confirmedById String?
+  confirmedBy   User?         @relation("DepositConfirmer", fields: [confirmedById], references: [id], onDelete: SetNull)
+  rejectedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  lines         DepositLine[]
+  ledgerEntries LedgerEntry[]
+
+  @@index([citizenId, status])
+  @@index([shopId, status])
+}
+
+model DepositLine {
+  id         String   @id @default(cuid())
+  depositId  String
+  deposit    Deposit  @relation(fields: [depositId], references: [id], onDelete: Cascade)
+  materialId String
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  quantity   Int
+  pointsEach Int
+  name       String
+  category   String
+  image      String
+
+  @@unique([depositId, materialId])
+}
+
+model LedgerEntry {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  depositId String?
+  deposit   Deposit?   @relation(fields: [depositId], references: [id], onDelete: SetNull)
+  kind      LedgerKind
+  points    Int
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+  @@unique([depositId, kind])
 }

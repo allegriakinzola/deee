@@ -12,7 +12,7 @@ export async function persistPartnerLogo(input: {
   bytes: Buffer
   previousLogo: string | null
 }): Promise<string> {
-  const { ext } = inspectImage(input.bytes)
+  const { ext } = inspectImage(input.bytes, "logo")
   const filename = `${input.partnerId}-${randomToken().slice(0, 12)}.${ext}`
   const publicPath = await writePublicUpload({
     directory: "partners",

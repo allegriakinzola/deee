@@ -31,6 +31,7 @@ const partnerSelect = {
   name: true,
   shortName: true,
   logo: true,
+  status: true,
 } as const
 
 export async function listShopsForPartner(partnerId: string) {
@@ -70,10 +71,21 @@ export async function findShopByPartnerSlug(partnerId: string, slug: string) {
   })
 }
 
+export async function findShopByCode(code: string) {
+  return prisma.shop.findUnique({
+    where: { code },
+    include: {
+      partner: { select: partnerSelect },
+      ...operatorInclude,
+    },
+  })
+}
+
 export async function createShopRecord(input: {
   partnerId: string
   name: string
   slug: string
+  code: string
   area: string
   lat: number
   lng: number
@@ -83,6 +95,7 @@ export async function createShopRecord(input: {
       partnerId: input.partnerId,
       name: input.name,
       slug: input.slug,
+      code: input.code,
       area: input.area,
       lat: input.lat,
       lng: input.lng,

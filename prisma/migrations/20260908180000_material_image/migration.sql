@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Material" ADD COLUMN "image" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Material" ALTER COLUMN "image" DROP DEFAULT;

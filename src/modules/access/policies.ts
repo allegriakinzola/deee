@@ -23,6 +23,18 @@ export function canManagePartners(role: UserRole): boolean {
   return role === "GVB_ADMIN"
 }
 
+export function canManageCatalogs(role: UserRole): boolean {
+  return role === "GVB_ADMIN"
+}
+
+export function canManageMaterials(role: UserRole): boolean {
+  return role === "GVB_ADMIN"
+}
+
+export function canManageSettings(role: UserRole): boolean {
+  return role === "GVB_ADMIN"
+}
+
 export function canViewNetworkShops(role: UserRole): boolean {
   return role === "GVB_ADMIN"
 }

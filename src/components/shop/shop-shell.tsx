@@ -7,6 +7,7 @@ import { LogoutButton } from "@/components/gvb/logout-button"
 import { ShopNav } from "@/components/shop/shop-nav"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { displayShopCode } from "@/lib/shop-code"
 import type { AuthUser } from "@/modules/auth"
 
 export function ShopShell({
@@ -26,6 +27,11 @@ export function ShopShell({
           </p>
           {user.shopName ? (
             <p className="mt-2 truncate text-sm font-medium">{user.shopName}</p>
+          ) : null}
+          {user.shopCode ? (
+            <p className="mt-1 font-mono text-xs tracking-[0.18em] text-muted-foreground">
+              {displayShopCode(user.shopCode)}
+            </p>
           ) : null}
           {user.partnerName ? (
             <div className="mt-2 flex items-center gap-2.5">

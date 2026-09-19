@@ -1,4 +1,5 @@
 import type { DirectoryShop } from "@/modules/shops"
+import { normalizeShopCode } from "@/lib/shop-code"
 
 export type ShopsViewFilter = "all" | "active" | "pending" | "disabled"
 
@@ -34,10 +35,14 @@ export function filterShops(
     }
     if (filter === "disabled" && shop.status !== "DISABLED") return false
     if (!needle) return true
+    const codeNeedle = normalizeShopCode(query)
     return (
       shop.name.toLowerCase().includes(needle) ||
       shop.area.toLowerCase().includes(needle) ||
       shop.partnerName.toLowerCase().includes(needle) ||
+      shop.code.toLowerCase().includes(needle) ||
+      (codeNeedle.length > 0 &&
+        normalizeShopCode(shop.code).includes(codeNeedle)) ||
       (shop.operator?.email ?? "").toLowerCase().includes(needle) ||
       (shop.operator?.displayName ?? "").toLowerCase().includes(needle)
     )

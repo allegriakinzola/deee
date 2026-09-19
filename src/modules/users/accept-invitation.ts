@@ -125,6 +125,8 @@ export async function acceptInvitation(
       invitation.user.role === "SHOP_STAFF" && shopReady ? shop.id : null,
     shopName:
       invitation.user.role === "SHOP_STAFF" && shopReady ? shop.name : null,
+    shopCode:
+      invitation.user.role === "SHOP_STAFF" && shopReady ? shop.code : null,
   }
 
   return {

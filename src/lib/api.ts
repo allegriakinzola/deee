@@ -69,8 +69,23 @@ export async function postForm<T>(
   path: string,
   body: FormData
 ): Promise<ApiResult<T>> {
+  return sendForm("POST", path, body)
+}
+
+export async function patchForm<T>(
+  path: string,
+  body: FormData
+): Promise<ApiResult<T>> {
+  return sendForm("PATCH", path, body)
+}
+
+async function sendForm<T>(
+  method: string,
+  path: string,
+  body: FormData
+): Promise<ApiResult<T>> {
   try {
-    const response = await fetch(path, { method: "POST", body })
+    const response = await fetch(path, { method, body })
     const payload = await readPayload<T>(response)
 
     if (!response.ok || !("data" in payload)) {

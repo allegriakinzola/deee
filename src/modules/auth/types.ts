@@ -11,4 +11,5 @@ export type AuthUser = {
   partnerLogo: string | null
   shopId: string | null
   shopName: string | null
+  shopCode: string | null
 }

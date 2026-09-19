@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { WaitingForData } from "@/components/dashboard/waiting-for-data"
+import { ShopCodePanel } from "@/components/shop/shop-code-panel"
 import { canAccessShopSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
 
@@ -33,8 +34,8 @@ export default async function ShopHomePage() {
           {user.partnerName ? ` (${user.partnerName})` : ""}.
         </p>
       </div>
+      {user.shopCode ? <ShopCodePanel code={user.shopCode} /> : null}
       <div className="grid gap-4 sm:grid-cols-2">
-        <WaitingForData title="Dépôts" />
         <WaitingForData title="Échanges" />
       </div>
     </div>

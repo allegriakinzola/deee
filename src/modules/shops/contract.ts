@@ -18,6 +18,7 @@ export type DirectoryShop = {
   partnerLogo: string | null
   name: string
   slug: string
+  code: string
   area: string
   lat: number
   lng: number

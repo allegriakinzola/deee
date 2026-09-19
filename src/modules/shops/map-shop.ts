@@ -18,6 +18,7 @@ export function toDirectoryShop(shop: ShopRow): DirectoryShop {
     partnerLogo: shop.partner.logo,
     name: shop.name,
     slug: shop.slug,
+    code: shop.code,
     area: shop.area,
     lat: shop.lat,
     lng: shop.lng,

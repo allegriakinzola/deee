@@ -15,7 +15,15 @@ function createPrismaClient(): PrismaClient {
 }
 
 function isCurrentClient(client: PrismaClient): boolean {
-  return "partner" in client && "shop" in client
+  return (
+    "partner" in client &&
+    "shop" in client &&
+    "catalog" in client &&
+    "material" in client &&
+    "operatorSettings" in client &&
+    "deposit" in client &&
+    "ledgerEntry" in client
+  )
 }
 
 const cached = globalForPrisma.prisma

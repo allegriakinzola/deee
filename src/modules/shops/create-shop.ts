@@ -9,7 +9,8 @@ import { shopAreaSchema } from "./area"
 import { assertCanManageOwnShops } from "./assert-manager"
 import type { ShopInvitationResult } from "./contract"
 import { inviteShopStaff } from "./invite-shop-staff"
-import { createShopRecord, findShopByPartnerSlug } from "./repository"
+import { createShopRecord, findShopByCode, findShopByPartnerSlug } from "./repository"
+import { generateShopCode } from "./generate-code"
 import { slugifyShopName } from "./slug"
 
 const createInputSchema = z.object({
@@ -28,6 +29,7 @@ const createInputSchema = z.object({
 export type CreateShopResult = {
   id: string
   name: string
+  code: string
   invitation: ShopInvitationResult | null
 }
 
@@ -56,10 +58,27 @@ export async function createShop(
     )
   }
 
+  let code = generateShopCode()
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const taken = await findShopByCode(code)
+    if (!taken) {
+      break
+    }
+    if (attempt === 7) {
+      throw new AppError(
+        ErrorCode.VALIDATION,
+        500,
+        "Impossible de générer un code shop unique. Réessayez."
+      )
+    }
+    code = generateShopCode()
+  }
+
   const shop = await createShopRecord({
     partnerId,
     name: parsed.data.name,
     slug,
+    code,
     area: parsed.data.area,
     lat: parsed.data.lat,
     lng: parsed.data.lng,
@@ -73,6 +92,7 @@ export async function createShop(
   return {
     id: shop.id,
     name: shop.name,
+    code: shop.code,
     invitation,
   }
 }

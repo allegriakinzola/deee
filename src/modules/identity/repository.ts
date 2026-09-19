@@ -30,6 +30,7 @@ export async function findUserByIdentifier(identifier: ParsedIdentifier) {
                 select: {
                   id: true,
                   name: true,
+                  code: true,
                   status: true,
                   partner: {
                     select: { id: true, name: true, logo: true, status: true },
