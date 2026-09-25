@@ -46,6 +46,18 @@ export async function listShopsForPartner(partnerId: string) {
   })
 }
 
+export async function countShops(input?: {
+  partnerId?: string
+  status?: ShopStatus
+}) {
+  return prisma.shop.count({
+    where: {
+      ...(input?.partnerId ? { partnerId: input.partnerId } : {}),
+      ...(input?.status ? { status: input.status } : {}),
+    },
+  })
+}
+
 export async function listAllShops() {
   return prisma.shop.findMany({
     orderBy: [{ partner: { name: "asc" } }, { name: "asc" }],

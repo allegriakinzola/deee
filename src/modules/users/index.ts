@@ -13,6 +13,8 @@ export {
   parseGvbAdminSeedInput,
 } from "./gvb-admin-profile"
 export { listDirectoryUsers } from "./list-users"
+export type { AdminDashboard } from "./get-admin-dashboard"
+export { getAdminDashboard } from "./get-admin-dashboard"
 export { inviteGvbOperator } from "./invite-gvb-operator"
 export { registerCitizen } from "./register-citizen"
 export { provisionInvitedUser } from "./provision-invited-user"

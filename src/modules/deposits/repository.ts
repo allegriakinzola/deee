@@ -6,9 +6,37 @@ import { prisma } from "@/platform/db"
 
 const depositInclude = {
   citizen: { select: { displayName: true } },
-  shop: { select: { id: true, name: true, code: true, area: true } },
+  shop: {
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      area: true,
+      partner: { select: { id: true, name: true, shortName: true } },
+    },
+  },
   lines: { orderBy: { name: "asc" as const } },
 } as const
+
+export type DepositScope = {
+  shopId?: string
+  partnerId?: string
+  citizenId?: string
+}
+
+function depositWhere(
+  scope: DepositScope,
+  statuses: DepositStatus[]
+) {
+  return {
+    status: { in: statuses },
+    ...(scope.shopId ? { shopId: scope.shopId } : {}),
+    ...(scope.citizenId ? { citizenId: scope.citizenId } : {}),
+    ...(scope.partnerId
+      ? { shop: { is: { partnerId: scope.partnerId } } }
+      : {}),
+  }
+}
 
 export async function findDraftByCitizen(citizenId: string) {
   return prisma.deposit.findFirst({
@@ -48,13 +76,48 @@ export async function listShopDeposits(shopId: string, statuses: DepositStatus[]
   })
 }
 
+export async function countDeposits(
+  scope: DepositScope,
+  statuses: DepositStatus[]
+) {
+  return prisma.deposit.count({
+    where: depositWhere(scope, statuses),
+  })
+}
+
+export async function countDepositsByShop(
+  scope: DepositScope,
+  statuses: DepositStatus[]
+) {
+  return prisma.deposit.groupBy({
+    by: ["shopId"],
+    where: {
+      AND: [depositWhere(scope, statuses), { shopId: { not: null } }],
+    },
+    _count: { _all: true },
+  })
+}
+
+export async function listDepositsSince(
+  scope: DepositScope,
+  statuses: DepositStatus[],
+  since: Date
+) {
+  return prisma.deposit.findMany({
+    where: {
+      ...depositWhere(scope, statuses),
+      OR: [{ confirmedAt: { gte: since } }, { rejectedAt: { gte: since } }],
+    },
+    include: depositInclude,
+    orderBy: { updatedAt: "desc" },
+  })
+}
+
 export async function countShopDeposits(
   shopId: string,
   statuses: DepositStatus[]
 ) {
-  return prisma.deposit.count({
-    where: { shopId, status: { in: statuses } },
-  })
+  return countDeposits({ shopId }, statuses)
 }
 
 export async function listShopDepositsSince(
@@ -62,15 +125,7 @@ export async function listShopDepositsSince(
   statuses: DepositStatus[],
   since: Date
 ) {
-  return prisma.deposit.findMany({
-    where: {
-      shopId,
-      status: { in: statuses },
-      OR: [{ confirmedAt: { gte: since } }, { rejectedAt: { gte: since } }],
-    },
-    include: depositInclude,
-    orderBy: { updatedAt: "desc" },
-  })
+  return listDepositsSince({ shopId }, statuses, since)
 }
 
 export async function upsertDraftLine(input: {

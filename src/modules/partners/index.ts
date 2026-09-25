@@ -9,6 +9,9 @@ export type {
   PartnerInvitationResult,
 } from "./contract"
 export { listDirectoryPartners } from "./list-partners"
+export { countDirectoryPartners, countDirectoryPartnerMembers } from "./count-partners"
+export type { PartnerDashboard } from "./get-partner-dashboard"
+export { getPartnerDashboard } from "./get-partner-dashboard"
 export { listPartnerMembers } from "./list-partner-members"
 export { createPartner } from "./create-partner"
 export { invitePartnerAdmin } from "./invite-partner-admin"

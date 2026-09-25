@@ -63,6 +63,16 @@ export async function findUserByEmail(email: string) {
   return identity?.user ?? null
 }
 
+export async function countUsersByRole() {
+  const rows = await prisma.user.groupBy({
+    by: ["role"],
+    _count: { _all: true },
+  })
+  return Object.fromEntries(
+    rows.map((row) => [row.role, row._count._all])
+  ) as Partial<Record<(typeof rows)[number]["role"], number>>
+}
+
 export async function countActiveGvbAdmins(): Promise<number> {
   return prisma.user.count({
     where: { role: "GVB_ADMIN", status: "ACTIVE" },

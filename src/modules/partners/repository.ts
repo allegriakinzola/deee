@@ -4,6 +4,16 @@ import type { PartnerKind, PartnerStatus } from "@/generated/prisma/client"
 
 import { prisma } from "@/platform/db"
 
+export async function countPartners(status?: PartnerStatus) {
+  return prisma.partner.count({
+    where: status ? { status } : undefined,
+  })
+}
+
+export async function countPartnerMemberships(partnerId: string) {
+  return prisma.partnerMembership.count({ where: { partnerId } })
+}
+
 export async function listPartnersWithAdmins() {
   return prisma.partner.findMany({
     orderBy: { createdAt: "desc" },

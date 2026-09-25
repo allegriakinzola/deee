@@ -1,6 +1,5 @@
-import Link from "next/link"
-
 import { PeriodChart } from "@/components/dashboard/period-chart"
+import { DashboardStat } from "@/components/dashboard/stat"
 import { ShopCodePanel } from "@/components/shop/shop-code-panel"
 import { ShopReportDownloadButton } from "@/components/shop/shop-report-download"
 import { Badge } from "@/components/ui/badge"
@@ -49,22 +48,22 @@ export function ShopDashboardView({
       {shopCode ? <ShopCodePanel code={shopCode} /> : null}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat
+        <DashboardStat
           label="Dépôts en attente"
           value={String(data.pendingDeposits)}
           href="/shop/depots"
         />
-        <Stat
+        <DashboardStat
           label="Échanges en attente"
           value={String(data.pendingRedeems)}
           href="/shop/echanges"
         />
-        <Stat
+        <DashboardStat
           label="Dépôts confirmés"
           value={String(data.confirmedDeposits30)}
           hint={`${data.pointsCredited30} pts crédités`}
         />
-        <Stat
+        <DashboardStat
           label="Échanges confirmés"
           value={String(data.confirmedRedeems30)}
           hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)}`}
@@ -198,45 +197,6 @@ export function ShopDashboardView({
           )}
         </CardContent>
       </Card>
-    </div>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  hint,
-  href,
-}: {
-  label: string
-  value: string
-  hint?: string
-  href?: string
-}) {
-  const body = (
-    <>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
-      {hint ? (
-        <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
-      ) : null}
-    </>
-  )
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className="rounded-xl bg-card px-4 py-4 ring-1 ring-foreground/10"
-      >
-        {body}
-      </Link>
-    )
-  }
-
-  return (
-    <div className="rounded-xl bg-card px-4 py-4 ring-1 ring-foreground/10">
-      {body}
     </div>
   )
 }

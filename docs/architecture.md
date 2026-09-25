@@ -54,11 +54,11 @@ Un passage d’état métier se fait **dans une transaction SQL**, jamais dans R
 
 | Rôle | Espace | Statut |
 |---|---|---|
-| `GVB_ADMIN` | `/admin` | Ouvert |
+| `GVB_ADMIN` | `/admin` | Ouvert (tableau de bord réseau, partenaires, shops, matériels) |
 | `GVB_COLLECTOR` | `/collecte` | Pas encore |
-| `PARTNER_ADMIN` | `/partenaire` | Ouvert (accueil, utilisateurs, shops) |
-| `SHOP_STAFF` | `/shop` | Ouvert (accueil, dépôts, échanges) |
-| `CITIZEN` | `/compte` | Ouvert (accueil, dépôt, échange, shops, profil) |
+| `PARTNER_ADMIN` | `/partenaire` | Ouvert (tableau de bord, utilisateurs, shops) |
+| `SHOP_STAFF` | `/shop` | Ouvert (tableau de bord, dépôts, échanges, rapport PDF) |
+| `CITIZEN` | `/compte` | Ouvert (tableau de bord, dépôt, échange, shops, profil) |
 
 Un seul `/connexion`. Après login, `homePathFor(role)` envoie vers l’espace. Les espaces non ouverts tombent sur `/interdit`.
 

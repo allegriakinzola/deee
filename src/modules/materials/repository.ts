@@ -17,6 +17,12 @@ export async function listActiveMaterials() {
   })
 }
 
+export async function countMaterials(status?: CatalogStatus) {
+  return prisma.material.count({
+    where: status ? { status } : undefined,
+  })
+}
+
 export async function findMaterialById(id: string) {
   return prisma.material.findUnique({ where: { id } })
 }

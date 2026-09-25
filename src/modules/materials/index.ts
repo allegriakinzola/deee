@@ -3,6 +3,7 @@
  */
 export type { DirectoryMaterial } from "./contract"
 export { listDirectoryMaterials } from "./list-materials"
+export { countDirectoryMaterials } from "./count-materials"
 export { listPickupMaterials, getActiveMaterial } from "./list-pickup"
 export { createMaterial } from "./create-material"
 export { updateMaterial } from "./update-material"

@@ -6,8 +6,33 @@ import { prisma } from "@/platform/db"
 
 const redeemInclude = {
   citizen: { select: { displayName: true } },
-  shop: { select: { id: true, name: true, code: true, area: true } },
+  shop: {
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      area: true,
+      partner: { select: { id: true, name: true, shortName: true } },
+    },
+  },
 } as const
+
+export type RedeemScope = {
+  shopId?: string
+  partnerId?: string
+  citizenId?: string
+}
+
+function redeemWhere(scope: RedeemScope, statuses: RedeemStatus[]) {
+  return {
+    status: { in: statuses },
+    ...(scope.shopId ? { shopId: scope.shopId } : {}),
+    ...(scope.citizenId ? { citizenId: scope.citizenId } : {}),
+    ...(scope.partnerId
+      ? { shop: { is: { partnerId: scope.partnerId } } }
+      : {}),
+  }
+}
 
 export async function sumPendingRedeemPoints(citizenId: string): Promise<number> {
   const result = await prisma.redeem.aggregate({
@@ -40,13 +65,46 @@ export async function listShopRedeems(shopId: string, statuses: RedeemStatus[]) 
   })
 }
 
+export async function countRedeems(
+  scope: RedeemScope,
+  statuses: RedeemStatus[]
+) {
+  return prisma.redeem.count({
+    where: redeemWhere(scope, statuses),
+  })
+}
+
+export async function countRedeemsByShop(
+  scope: RedeemScope,
+  statuses: RedeemStatus[]
+) {
+  return prisma.redeem.groupBy({
+    by: ["shopId"],
+    where: redeemWhere(scope, statuses),
+    _count: { _all: true },
+  })
+}
+
+export async function listRedeemsSince(
+  scope: RedeemScope,
+  statuses: RedeemStatus[],
+  since: Date
+) {
+  return prisma.redeem.findMany({
+    where: {
+      ...redeemWhere(scope, statuses),
+      OR: [{ confirmedAt: { gte: since } }, { rejectedAt: { gte: since } }],
+    },
+    include: redeemInclude,
+    orderBy: { updatedAt: "desc" },
+  })
+}
+
 export async function countShopRedeems(
   shopId: string,
   statuses: RedeemStatus[]
 ) {
-  return prisma.redeem.count({
-    where: { shopId, status: { in: statuses } },
-  })
+  return countRedeems({ shopId }, statuses)
 }
 
 export async function listShopRedeemsSince(
@@ -54,15 +112,7 @@ export async function listShopRedeemsSince(
   statuses: RedeemStatus[],
   since: Date
 ) {
-  return prisma.redeem.findMany({
-    where: {
-      shopId,
-      status: { in: statuses },
-      OR: [{ confirmedAt: { gte: since } }, { rejectedAt: { gte: since } }],
-    },
-    include: redeemInclude,
-    orderBy: { updatedAt: "desc" },
-  })
+  return listRedeemsSince({ shopId }, statuses, since)
 }
 
 export async function createSentRedeemRecord(input: {

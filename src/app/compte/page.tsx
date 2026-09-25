@@ -4,8 +4,7 @@ import { redirect } from "next/navigation"
 import { CitizenHome } from "@/components/citizen/citizen-home"
 import { canAccessCitizenSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
-import { getCitizenBalance } from "@/modules/ledger"
-import { getCitizenRedeemQuote } from "@/modules/redeems"
+import { getCitizenDashboard } from "@/modules/deposits"
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -21,19 +20,7 @@ export default async function CitizenHomePage() {
     redirect("/interdit")
   }
 
-  const [balance, quote] = await Promise.all([
-    getCitizenBalance(user),
-    getCitizenRedeemQuote(user),
-  ])
+  const data = await getCitizenDashboard(user)
 
-  return (
-    <CitizenHome
-      displayName={user.displayName}
-      points={balance.points}
-      availablePoints={quote.availablePoints}
-      bonsAvailable={quote.bonsAvailable}
-      pointsPerBon={quote.pointsPerBon}
-      lastDeposit={balance.lastDeposit}
-    />
-  )
+  return <CitizenHome displayName={user.displayName} data={data} />
 }

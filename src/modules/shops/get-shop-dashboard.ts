@@ -1,6 +1,6 @@
 import "server-only"
 
-import { formatDayLabel, lastUtcDays } from "@/lib/period"
+import { mergeDailySeries, mergeRecent } from "@/lib/dashboard"
 import { canAccessShopSpace } from "@/modules/access"
 import type { AuthUser } from "@/modules/auth"
 import { summarizeShopDeposits } from "@/modules/deposits"
@@ -59,10 +59,7 @@ export async function getShopDashboard(
     summarizeShopRedeems(shopId),
   ])
 
-  const depositByDay = new Map(deposits.daily.map((item) => [item.date, item]))
-  const redeemByDay = new Map(redeems.daily.map((item) => [item.date, item]))
-
-  const recent = [
+  const recent = mergeRecent([
     ...deposits.recent.map((item) => ({
       id: `deposit-${item.id}`,
       kind: "deposit" as const,
@@ -81,9 +78,7 @@ export async function getShopDashboard(
       points: item.points,
       at: item.at,
     })),
-  ]
-    .sort((a, b) => (a.at < b.at ? 1 : -1))
-    .slice(0, 8)
+  ])
 
   return {
     pendingDeposits: deposits.pending,
@@ -96,14 +91,7 @@ export async function getShopDashboard(
     pointsDebited30: redeems.pointsDebited30,
     bons30: redeems.bons30,
     usd30: redeems.usd30.toFixed(2),
-    daily: lastUtcDays(30).map((date) => ({
-      date,
-      label: formatDayLabel(date),
-      deposits: depositByDay.get(date)?.confirmed ?? 0,
-      redeems: redeemByDay.get(date)?.confirmed ?? 0,
-      pointsIn: depositByDay.get(date)?.points ?? 0,
-      pointsOut: redeemByDay.get(date)?.points ?? 0,
-    })),
+    daily: mergeDailySeries(deposits.daily, redeems.daily),
     topMaterials: deposits.topMaterials,
     rewards: redeems.rewards.map((item) => ({
       label: item.label,
