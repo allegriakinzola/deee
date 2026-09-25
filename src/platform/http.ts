@@ -52,3 +52,17 @@ export async function formFileBytes(
   }
   return Buffer.from(await value.arrayBuffer())
 }
+
+export function fileDownload(
+  bytes: Uint8Array,
+  filename: string,
+  contentType: string
+): Response {
+  return new Response(new Blob([Buffer.from(bytes)], { type: contentType }), {
+    headers: {
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-store",
+    },
+  })
+}

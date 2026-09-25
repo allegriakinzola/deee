@@ -24,3 +24,21 @@ export function formatDayLabel(iso: string): string {
     timeZone: "UTC",
   })
 }
+
+export function formatLongDateUtc(iso: string): string {
+  const [year, month, day] = iso.split("-").map(Number)
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  })
+}
+
+export function formatDateTimeKinshasa(date: Date): string {
+  return date.toLocaleString("fr-FR", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "Africa/Kinshasa",
+  })
+}

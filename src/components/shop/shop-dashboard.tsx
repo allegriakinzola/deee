@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { PeriodChart } from "@/components/dashboard/period-chart"
 import { ShopCodePanel } from "@/components/shop/shop-code-panel"
+import { ShopReportDownloadButton } from "@/components/shop/shop-report-download"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -28,18 +29,21 @@ export function ShopDashboardView({
 }) {
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <div>
-        <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
-          Tableau de bord
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Bonjour, {displayName}
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          {shopName}
-          {partnerName ? ` · ${partnerName}` : ""}. 30 derniers jours, sauf
-          mention contraire.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
+            Tableau de bord
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            Bonjour, {displayName}
+          </h1>
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            {shopName}
+            {partnerName ? ` · ${partnerName}` : ""}. 30 derniers jours, sauf
+            mention contraire.
+          </p>
+        </div>
+        <ShopReportDownloadButton />
       </div>
 
       {shopCode ? <ShopCodePanel code={shopCode} /> : null}

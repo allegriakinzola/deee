@@ -9,7 +9,7 @@ Chaque dossier est un **contexte**. Importer uniquement `index.ts` (sauf le seed
 | `auth` | Mot de passe, session, login, logout, utilisateur courant |
 | `access` | Chemin d’atterrissage et droits d’entrée par rôle |
 | `partners` | Entreprises partenaires ; équipe d’administrateurs d’entreprise |
-| `shops` | Points de dépôt ; un login et un code par boutique ; tableau de bord shop |
+| `shops` | Points de dépôt ; un login et un code par boutique ; tableau de bord et rapport PDF |
 | `notify` | E-mail SMTP (invitation d’activation) |
 | `catalog` | Conversion points ↔ USD / bons |
 | `settings` | Valeur d’un bon (1 bon = 10 USD par défaut) |
