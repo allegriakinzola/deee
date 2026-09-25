@@ -5,6 +5,7 @@ import { CitizenHome } from "@/components/citizen/citizen-home"
 import { canAccessCitizenSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
 import { getCitizenBalance } from "@/modules/ledger"
+import { getCitizenRedeemQuote } from "@/modules/redeems"
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -20,12 +21,18 @@ export default async function CitizenHomePage() {
     redirect("/interdit")
   }
 
-  const balance = await getCitizenBalance(user)
+  const [balance, quote] = await Promise.all([
+    getCitizenBalance(user),
+    getCitizenRedeemQuote(user),
+  ])
 
   return (
     <CitizenHome
       displayName={user.displayName}
       points={balance.points}
+      availablePoints={quote.availablePoints}
+      bonsAvailable={quote.bonsAvailable}
+      pointsPerBon={quote.pointsPerBon}
       lastDeposit={balance.lastDeposit}
     />
   )

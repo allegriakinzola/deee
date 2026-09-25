@@ -11,7 +11,7 @@ import { SpaceNav } from "@/components/workspace/space-nav"
 const ITEMS = [
   { href: "/shop", label: "Tableau de bord", icon: LayoutDashboardIcon },
   { href: "/shop/depots", label: "Dépôts", icon: RecycleIcon },
-  { href: "/shop/echanges", label: "Échanges", icon: SparklesIcon, soon: true },
+  { href: "/shop/echanges", label: "Échanges", icon: SparklesIcon },
 ] as const
 
 export function ShopNav({ variant }: { variant: "side" | "mobile" }) {

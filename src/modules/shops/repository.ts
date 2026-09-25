@@ -31,6 +31,7 @@ const partnerSelect = {
   name: true,
   shortName: true,
   logo: true,
+  kind: true,
   status: true,
 } as const
 

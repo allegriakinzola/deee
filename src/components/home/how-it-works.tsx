@@ -19,7 +19,7 @@ const STEPS = [
   {
     n: "03",
     title: "Échangez vos points",
-    text: "Crédit, produit ou service : l’échange se fait en shop, avec le responsable.",
+    text: "Dès 1 bon (10 USD de points), l’échange se fait en shop, avec le responsable.",
     icon: SparklesIcon,
   },
 ]

@@ -5,7 +5,6 @@ import { ShopDepositsWorkspace } from "@/components/shop/shop-deposits-workspace
 import { canAccessShopSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
 import { listShopInbox } from "@/modules/deposits"
-import { listPickupMaterials } from "@/modules/materials"
 
 export const metadata: Metadata = {
   title: "Dépôts",
@@ -21,16 +20,9 @@ export default async function ShopDepositsPage() {
     redirect("/interdit")
   }
 
-  const [inbox, materials] = await Promise.all([
-    listShopInbox(actor),
-    listPickupMaterials(actor),
-  ])
+  const inbox = await listShopInbox(actor)
 
   return (
-    <ShopDepositsWorkspace
-      pending={inbox.pending}
-      done={inbox.done}
-      materials={materials}
-    />
+    <ShopDepositsWorkspace pending={inbox.pending} done={inbox.done} />
   )
 }

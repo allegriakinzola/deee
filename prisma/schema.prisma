@@ -55,8 +55,15 @@ enum DepositStatus {
   REJECTED
 }
 
+enum RedeemStatus {
+  SENT
+  CONFIRMED
+  REJECTED
+}
+
 enum LedgerKind {
   DEPOSIT_CREDIT
+  REDEEM_DEBIT
 }
 
 model User {
@@ -76,6 +83,8 @@ model User {
   shopMembership     ShopMembership?
   citizenDeposits    Deposit[]      @relation("DepositCitizen")
   confirmedDeposits  Deposit[]      @relation("DepositConfirmer")
+  citizenRedeems     Redeem[]       @relation("RedeemCitizen")
+  confirmedRedeems   Redeem[]       @relation("RedeemConfirmer")
   ledgerEntries      LedgerEntry[]
 }
 
@@ -183,6 +192,7 @@ model Shop {
 
   membership ShopMembership?
   deposits   Deposit[]
+  redeems    Redeem[]
 
   @@unique([partnerId, slug])
   @@index([partnerId])
@@ -288,6 +298,35 @@ model Deposit {
   @@index([shopId, status])
 }
 
+/// Demande d’échange. Les points ne sont débités qu’à la confirmation shop.
+/// Un bon = ticket minimum (valeur USD globale, points figés à l’envoi).
+model Redeem {
+  id            String       @id @default(cuid())
+  citizenId     String
+  citizen       User         @relation("RedeemCitizen", fields: [citizenId], references: [id], onDelete: Restrict)
+  shopId        String
+  shop          Shop         @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  status        RedeemStatus @default(SENT)
+  bons          Int
+  points        Int
+  rewardId      String
+  rewardLabel   String
+  partnerKind   PartnerKind
+  usdValue      Decimal      @db.Decimal(10, 2)
+  sentAt        DateTime     @default(now())
+  confirmedAt   DateTime?
+  confirmedById String?
+  confirmedBy   User?        @relation("RedeemConfirmer", fields: [confirmedById], references: [id], onDelete: SetNull)
+  rejectedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  ledgerEntries LedgerEntry[]
+
+  @@index([citizenId, status])
+  @@index([shopId, status])
+}
+
 model DepositLine {
   id         String   @id @default(cuid())
   depositId  String
@@ -309,10 +348,13 @@ model LedgerEntry {
   user      User       @relation(fields: [userId], references: [id], onDelete: Restrict)
   depositId String?
   deposit   Deposit?   @relation(fields: [depositId], references: [id], onDelete: SetNull)
+  redeemId  String?
+  redeem    Redeem?    @relation(fields: [redeemId], references: [id], onDelete: SetNull)
   kind      LedgerKind
   points    Int
   createdAt DateTime   @default(now())
 
   @@index([userId])
   @@unique([depositId, kind])
+  @@unique([redeemId, kind])
 }

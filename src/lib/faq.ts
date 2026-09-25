@@ -9,7 +9,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Comment échanger mes points ?",
-    a: "Rendez-vous en shop avec au moins 50 points. Le responsable confirme l’échange, puis les points sont débités.",
+    a: "Rendez-vous en shop avec au moins 1 bon (250 points, soit 10 USD au barème actuel). Le responsable confirme l’échange, puis les points sont débités.",
   },
   {
     q: "Que devient l’appareil déposé ?",

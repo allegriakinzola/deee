@@ -3,7 +3,6 @@ import "server-only"
 import { z } from "zod"
 
 import type { AuthUser } from "@/modules/auth"
-import { getActiveMaterial } from "@/modules/materials"
 import { AppError, ErrorCode } from "@/platform/errors"
 
 import { assertShopStaff } from "./assert-shop"
@@ -49,32 +48,20 @@ export async function confirmShopDeposit(
     const already = existing.lines.find(
       (line) => line.materialId === item.materialId
     )
-    if (already) {
-      lines.push({
-        materialId: already.materialId,
-        quantity: item.quantity,
-        pointsEach: already.pointsEach,
-        name: already.name,
-        category: already.category,
-        image: already.image,
-      })
-      continue
-    }
-    const material = await getActiveMaterial(item.materialId)
-    if (!material) {
+    if (!already) {
       throw new AppError(
         ErrorCode.VALIDATION,
-        404,
-        "Un matériel de la liste n’est plus accepté."
+        400,
+        "Vous ne pouvez pas ajouter un matériel qui n’était pas dans la demande."
       )
     }
     lines.push({
-      materialId: material.id,
+      materialId: already.materialId,
       quantity: item.quantity,
-      pointsEach: material.points,
-      name: material.name,
-      category: material.category,
-      image: material.image,
+      pointsEach: already.pointsEach,
+      name: already.name,
+      category: already.category,
+      image: already.image,
     })
   }
 

@@ -8,6 +8,7 @@ import {
   getCitizenDraft,
   listCitizenDepositHistory,
 } from "@/modules/deposits"
+import { DEFAULT_USD_PER_POINT } from "@/modules/catalog"
 import { listPickupMaterials } from "@/modules/materials"
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default async function CitizenDepositPage() {
       materials={materials}
       draft={draft}
       history={history}
+      usdPerPoint={DEFAULT_USD_PER_POINT}
     />
   )
 }

@@ -50,6 +50,10 @@ async function sendJson<T>(
   }
 }
 
+export function getJson<T>(path: string): Promise<ApiResult<T>> {
+  return sendJson<T>("GET", path)
+}
+
 export function postJson<T>(path: string, body?: unknown): Promise<ApiResult<T>> {
   return sendJson<T>("POST", path, body)
 }

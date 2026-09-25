@@ -57,8 +57,8 @@ Un passage d’état métier se fait **dans une transaction SQL**, jamais dans R
 | `GVB_ADMIN` | `/admin` | Ouvert |
 | `GVB_COLLECTOR` | `/collecte` | Pas encore |
 | `PARTNER_ADMIN` | `/partenaire` | Ouvert (accueil, utilisateurs, shops) |
-| `SHOP_STAFF` | `/shop` | Ouvert (accueil, dépôts) |
-| `CITIZEN` | `/compte` | Ouvert (accueil, dépôt, shops, profil) |
+| `SHOP_STAFF` | `/shop` | Ouvert (accueil, dépôts, échanges) |
+| `CITIZEN` | `/compte` | Ouvert (accueil, dépôt, échange, shops, profil) |
 
 Un seul `/connexion`. Après login, `homePathFor(role)` envoie vers l’espace. Les espaces non ouverts tombent sur `/interdit`.
 
@@ -70,9 +70,11 @@ La GVB n’est pas un partenaire. C’est l’opérateur de la plateforme. Un `G
 
 Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) et un **code unique** (6 caractères, affiché `ABC-DEF`). Le responsable le communique au citoyen au comptoir. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique (`lib/shops.ts`) reste statique.
 
-Les **matériels** sont gérés par la GVB (`/admin/materiels`), sans catalogue intermédiaire. La catégorie est précodée ; le nom et les points sont en base. Les points se convertissent en USD, puis en **bons**. La valeur d’un bon se règle dans **Paramètres** (`/admin/parametres`) : **1 bon = 10 USD** par défaut.
+Les **matériels** sont gérés par la GVB (`/admin/materiels`), sans catalogue intermédiaire. La catégorie est précodée ; le nom et les points sont en base. Les points se convertissent en USD, puis en **bons**. Un bon est le **ticket minimum** pour échanger : sa valeur se règle dans **Paramètres** (`/admin/parametres`), **1 bon = 10 USD** par défaut (250 points si 1 pt = 0,04 USD).
 
 Un **dépôt** suit : brouillon citoyen (`DRAFT`) → envoi au shop via le code (`SENT`) → confirmation ou refus du responsable. Les points ne sont crédités au citoyen **qu’à la confirmation**, dans la même transaction SQL que le passage à `CONFIRMED` (`LedgerEntry` / `DEPOSIT_CREDIT`). Le shop n’est pas crédité au dépôt.
+
+Un **échange** suit : le citoyen envoie une demande (`SENT`) avec un nombre de bons et le code shop, dès qu’il a au moins 1 bon disponible (les demandes en attente réservent les points). Le responsable confirme ou refuse. Les points ne sont débités **qu’à la confirmation** (`LedgerEntry` / `REDEEM_DEBIT`, montant négatif). Le shop n’est pas crédité.
 
 ## API
 
@@ -95,7 +97,7 @@ Un **dépôt** suit : brouillon citoyen (`DRAFT`) → envoi au shop via le code 
 | `materials` | Matériels DEEE (GVB) |
 | `settings` | Réglages opérateur ; valeur d’un bon |
 | `deposits` | Demandes de dépôt (brouillon, envoi par code shop, confirmation) |
-| `redeems` | Demandes d’échange + confirmation shop |
+| `redeems` | Demandes d’échange (bons, envoi par code shop, confirmation, débit) |
 | `ledger` | Points, écritures, transactions SQL |
 | `collections` | Tournées collecteur (plus tard) |
 | `notify` | E-mail SMTP (invitations) ; SMS plus tard |

@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { WaitingForData } from "@/components/dashboard/waiting-for-data"
-import { ShopCodePanel } from "@/components/shop/shop-code-panel"
+import { ShopDashboardView } from "@/components/shop/shop-dashboard"
 import { canAccessShopSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
+import { getShopDashboard } from "@/modules/shops"
 
 export const metadata: Metadata = {
   title: "Espace shop",
@@ -20,24 +20,15 @@ export default async function ShopHomePage() {
     redirect("/interdit")
   }
 
+  const data = await getShopDashboard(user)
+
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <div>
-        <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
-          Tableau de bord
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Bonjour, {user.displayName}
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Vous êtes le responsable de {user.shopName ?? "ce shop"}
-          {user.partnerName ? ` (${user.partnerName})` : ""}.
-        </p>
-      </div>
-      {user.shopCode ? <ShopCodePanel code={user.shopCode} /> : null}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <WaitingForData title="Échanges" />
-      </div>
-    </div>
+    <ShopDashboardView
+      displayName={user.displayName}
+      shopName={user.shopName ?? "ce shop"}
+      partnerName={user.partnerName}
+      shopCode={user.shopCode}
+      data={data}
+    />
   )
 }

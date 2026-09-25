@@ -14,10 +14,16 @@ const NEAREST = SHOPS.find((shop) => shop.id === "vodacom-gombe") ?? SHOPS[0]
 export function CitizenHome({
   displayName,
   points,
+  availablePoints,
+  bonsAvailable,
+  pointsPerBon,
   lastDeposit,
 }: {
   displayName: string
   points: number
+  availablePoints: number
+  bonsAvailable: number
+  pointsPerBon: number
   lastDeposit: {
     shopName: string
     points: number
@@ -25,6 +31,7 @@ export function CitizenHome({
   } | null
 }) {
   const firstName = displayName.trim().split(/\s+/)[0] || displayName
+  const pointsToBon = Math.max(0, pointsPerBon - availablePoints)
 
   return (
     <div className="flex flex-col gap-3 pb-1 lg:gap-6">
@@ -38,7 +45,9 @@ export function CitizenHome({
         <p className="mt-2 text-[13px] opacity-80 lg:text-sm">
           {points === 0
             ? `Déposez un appareil en shop pour créditer votre compte, ${firstName}.`
-            : `Vos points sont utilisables en shop, ${firstName}.`}
+            : bonsAvailable < 1
+              ? `Encore ${pointsToBon} pts pour 1 bon, ${firstName}.`
+              : `${bonsAvailable} bon${bonsAvailable === 1 ? "" : "s"} à échanger en shop, ${firstName}.`}
         </p>
       </section>
 
@@ -46,7 +55,7 @@ export function CitizenHome({
         <QuickAction href="/compte/depot" icon={RecycleIcon} label="Déposer" />
         <QuickAction href="/compte/shops" icon={MapPinIcon} label="Shops" />
         <QuickAction icon={SmartphoneIcon} label="Catalogue" soon />
-        <QuickAction icon={SparklesIcon} label="Échanger" soon />
+        <QuickAction href="/compte/echange" icon={SparklesIcon} label="Échanger" />
       </div>
 
       <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-6">

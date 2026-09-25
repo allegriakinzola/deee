@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 const TABS = [
   { href: "/compte", label: "Accueil", icon: HouseIcon, exact: true },
   { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
+  { href: "/compte/echange", label: "Échanger", icon: SparklesIcon },
   { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
   { href: "/compte/profil", label: "Compte", icon: UserIcon },
 ] as const
@@ -25,16 +26,11 @@ const SIDE = [
   { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
   { href: "/compte/profil", label: "Compte", icon: UserIcon },
   { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
+  { href: "/compte/echange", label: "Échanger", icon: SparklesIcon },
   {
     href: "/compte/catalogue",
     label: "Catalogue",
     icon: SmartphoneIcon,
-    soon: true,
-  },
-  {
-    href: "/compte/echange",
-    label: "Échanger",
-    icon: SparklesIcon,
     soon: true,
   },
 ] as const
@@ -54,7 +50,7 @@ export function CitizenTabBar() {
 
   return (
     <nav className="shrink-0 border-t border-zinc-200/80 bg-white px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] lg:hidden">
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {TABS.map((tab) => {
           const Icon = tab.icon
           if ("soon" in tab && tab.soon) {

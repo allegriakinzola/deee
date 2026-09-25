@@ -48,6 +48,31 @@ export async function listShopDeposits(shopId: string, statuses: DepositStatus[]
   })
 }
 
+export async function countShopDeposits(
+  shopId: string,
+  statuses: DepositStatus[]
+) {
+  return prisma.deposit.count({
+    where: { shopId, status: { in: statuses } },
+  })
+}
+
+export async function listShopDepositsSince(
+  shopId: string,
+  statuses: DepositStatus[],
+  since: Date
+) {
+  return prisma.deposit.findMany({
+    where: {
+      shopId,
+      status: { in: statuses },
+      OR: [{ confirmedAt: { gte: since } }, { rejectedAt: { gte: since } }],
+    },
+    include: depositInclude,
+    orderBy: { updatedAt: "desc" },
+  })
+}
+
 export async function upsertDraftLine(input: {
   depositId: string
   materialId: string
@@ -108,6 +133,20 @@ export async function sendDraftRecord(input: {
     where: { id: input.depositId },
     include: depositInclude,
   })
+}
+
+export async function deleteCitizenDepositRecord(input: {
+  depositId: string
+  citizenId: string
+}) {
+  const result = await prisma.deposit.deleteMany({
+    where: {
+      id: input.depositId,
+      citizenId: input.citizenId,
+      status: { in: ["DRAFT", "SENT"] },
+    },
+  })
+  return result.count > 0
 }
 
 export async function rejectDepositRecord(depositId: string) {

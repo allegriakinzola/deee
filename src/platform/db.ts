@@ -22,6 +22,7 @@ function isCurrentClient(client: PrismaClient): boolean {
     "material" in client &&
     "operatorSettings" in client &&
     "deposit" in client &&
+    "redeem" in client &&
     "ledgerEntry" in client
   )
 }

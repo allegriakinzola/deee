@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { MinusIcon, PlusIcon } from "lucide-react"
 
@@ -9,19 +9,17 @@ import { displayShopCode } from "@/lib/shop-code"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { DirectoryDeposit } from "@/modules/deposits"
-import type { DirectoryMaterial } from "@/modules/materials"
 
 export function ShopDepositsWorkspace({
   pending,
   done,
-  materials,
 }: {
   pending: DirectoryDeposit[]
   done: DirectoryDeposit[]
-  materials: DirectoryMaterial[]
 }) {
   const router = useRouter()
   const [openId, setOpenId] = useState<string | null>(pending[0]?.id ?? null)
+  const [historyOpenId, setHistoryOpenId] = useState<string | null>(null)
   const [error, setError] = useState("")
   const [busyId, setBusyId] = useState<string | null>(null)
   const [qty, setQty] = useState<Record<string, number>>({})
@@ -46,14 +44,6 @@ export function ShopDepositsWorkspace({
     }
     setQty(next)
   }, [open])
-
-  const extraMaterials = useMemo(() => {
-    if (!open) {
-      return []
-    }
-    const used = new Set(open.lines.map((line) => line.materialId))
-    return materials.filter((item) => !used.has(item.id))
-  }, [materials, open])
 
   async function confirm(deposit: DirectoryDeposit) {
     const lines = Object.entries(qty)
@@ -94,8 +84,8 @@ export function ShopDepositsWorkspace({
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Dépôts</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Vérifiez les articles apportés, ajustez la liste, puis confirmez.
-          Les points ne sont crédités qu’après confirmation.
+          Vérifiez les articles apportés, ajustez les quantités, puis
+          confirmez. Les points ne sont crédités qu’après confirmation.
         </p>
       </div>
 
@@ -150,60 +140,6 @@ export function ShopDepositsWorkspace({
                         }
                       />
                     ))}
-                    {extraMaterials.length > 0 ? (
-                      <div>
-                        <p className="mb-2 text-xs text-muted-foreground">
-                          Ajouter un matériel
-                        </p>
-                        <select
-                          className="h-11 w-full rounded-2xl border border-transparent bg-muted/70 px-4 text-sm"
-                          defaultValue=""
-                          onChange={(event) => {
-                            const id = event.target.value
-                            if (!id) {
-                              return
-                            }
-                            setQty((current) => ({
-                              ...current,
-                              [id]: (current[id] ?? 0) + 1,
-                            }))
-                            event.target.value = ""
-                          }}
-                        >
-                          <option value="">Choisir…</option>
-                          {extraMaterials.map((item) => (
-                            <option key={item.id} value={item.id}>
-                              {item.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : null}
-                    {Object.entries(qty)
-                      .filter(
-                        ([id]) =>
-                          !deposit.lines.some((line) => line.materialId === id)
-                      )
-                      .map(([id, quantity]) => {
-                        const material = materials.find((item) => item.id === id)
-                        if (!material || quantity <= 0) {
-                          return null
-                        }
-                        return (
-                          <LineRow
-                            key={id}
-                            name={material.name}
-                            image={material.image}
-                            quantity={quantity}
-                            onChange={(value) =>
-                              setQty((current) => ({
-                                ...current,
-                                [id]: value,
-                              }))
-                            }
-                          />
-                        )
-                      })}
                     <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
                       <Button
                         type="button"
@@ -234,30 +170,72 @@ export function ShopDepositsWorkspace({
       {done.length > 0 ? (
         <section className="space-y-3">
           <h2 className="text-sm font-medium">Historique</h2>
-          <ul className="overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10">
-            {done.map((deposit) => (
-              <li
-                key={deposit.id}
-                className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-3 first:border-t-0"
-              >
-                <div>
-                  <p className="font-medium">{deposit.citizenName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {deposit.pointsTotal} pts
-                    {deposit.shopCode
-                      ? ` · ${displayShopCode(deposit.shopCode)}`
-                      : ""}
-                  </p>
-                </div>
-                <Badge
-                  variant={
-                    deposit.status === "CONFIRMED" ? "default" : "secondary"
-                  }
+          <ul className="space-y-3">
+            {done.map((deposit) => {
+              const expanded = historyOpenId === deposit.id
+              return (
+                <li
+                  key={deposit.id}
+                  className="overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10"
                 >
-                  {deposit.status === "CONFIRMED" ? "Confirmé" : "Refusé"}
-                </Badge>
-              </li>
-            ))}
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                    onClick={() =>
+                      setHistoryOpenId(expanded ? null : deposit.id)
+                    }
+                    aria-expanded={expanded}
+                  >
+                    <div>
+                      <p className="font-medium">{deposit.citizenName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {deposit.pointsTotal} pts
+                        {deposit.shopCode
+                          ? ` · ${displayShopCode(deposit.shopCode)}`
+                          : ""}
+                        {` · ${deposit.lines.length} article${deposit.lines.length === 1 ? "" : "s"}`}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        deposit.status === "CONFIRMED" ? "default" : "secondary"
+                      }
+                    >
+                      {deposit.status === "CONFIRMED" ? "Confirmé" : "Refusé"}
+                    </Badge>
+                  </button>
+                  {expanded ? (
+                    <ul className="space-y-3 border-t border-border/80 px-4 py-4">
+                      {deposit.lines.map((line) => (
+                        <li
+                          key={line.id}
+                          className="flex items-center gap-3"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={line.image}
+                            alt=""
+                            className="size-12 rounded-xl object-cover"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">
+                              {line.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {line.category} · {line.quantity} ×{" "}
+                              {line.pointsEach} pts
+                            </p>
+                          </div>
+                          <p className="shrink-0 text-sm font-medium">
+                            {line.pointsTotal} pts
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              )
+            })}
           </ul>
         </section>
       ) : null}

@@ -65,8 +65,9 @@ export function BonSettingsForm({
         <CardHeader className="border-b border-border/80 py-5">
           <CardTitle>Valeur d’un bon</CardTitle>
           <CardDescription>
-            Un bon est l’unité échangée en shop : crédit, écriture ou autre
-            récompense. Les points d’un dépôt se convertissent ensuite en bons.
+            Un bon est le ticket minimum avant d’échanger des points en shop.
+            Sa valeur en USD fixe le nombre de points requis (1 bon = 10 USD
+            par défaut).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 py-5">
