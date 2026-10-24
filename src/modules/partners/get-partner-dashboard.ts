@@ -35,11 +35,18 @@ export type PartnerDashboard = {
     id: string
     name: string
     area: string
+    code: string
     status: "ACTIVE" | "DISABLED"
+    operatorName: string | null
+    operatorEmail: string | null
+    operatorAccess: "READY" | "PENDING" | "EXPIRED" | null
     pendingDeposits: number
     pendingRedeems: number
     deposits30: number
+    points30: number
     redeems30: number
+    bons30: number
+    usd30: string
   }>
   topMaterials: Array<{ name: string; quantity: number; points: number }>
   rewards: Array<{ label: string; count: number; bons: number; usd: string }>
@@ -104,11 +111,18 @@ export async function getPartnerDashboard(
       id: shop.id,
       name: shop.name,
       area: shop.area,
+      code: shop.code,
       status: shop.status,
+      operatorName: shop.operator?.displayName ?? null,
+      operatorEmail: shop.operator?.email ?? null,
+      operatorAccess: shop.operator?.access ?? null,
       pendingDeposits: depositPending.get(shop.id) ?? 0,
       pendingRedeems: redeemPending.get(shop.id) ?? 0,
       deposits30: depositByShop.get(shop.id)?.confirmed ?? 0,
+      points30: depositByShop.get(shop.id)?.points ?? 0,
       redeems30: redeemByShop.get(shop.id)?.confirmed ?? 0,
+      bons30: redeemByShop.get(shop.id)?.bons ?? 0,
+      usd30: (redeemByShop.get(shop.id)?.usd ?? 0).toFixed(2),
     })),
     topMaterials: deposits.topMaterials,
     rewards: redeems.rewards.map((item) => ({

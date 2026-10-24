@@ -1,7 +1,9 @@
 import { config } from "dotenv"
 
-config({ path: ".env", override: true })
-config({ path: ".env.local", override: true })
+if (!process.env.VERCEL) {
+  config({ path: ".env", override: true })
+  config({ path: ".env.local", override: true })
+}
 
 function required(name: string): string {
   const value = process.env[name]?.trim()
@@ -12,11 +14,19 @@ function required(name: string): string {
 }
 
 export function getDatabaseUrl(): string {
-  return required("DATABASE_URL")
+  return withExplicitSsl(required("DATABASE_URL"))
 }
 
 export function getDirectUrl(): string {
-  return process.env.DIRECT_URL?.trim() || getDatabaseUrl()
+  const direct = process.env.DIRECT_URL?.trim()
+  return withExplicitSsl(direct || getDatabaseUrl())
+}
+
+function withExplicitSsl(url: string): string {
+  return url.replace(
+    /([?&])sslmode=(require|prefer|verify-ca)\b/i,
+    "$1sslmode=verify-full"
+  )
 }
 
 export function getSmtpConfig(): {

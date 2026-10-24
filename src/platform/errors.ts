@@ -30,3 +30,22 @@ export class AppError extends Error {
 export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError
 }
+
+export function appErrorFromUnknown(error: unknown): AppError | null {
+  if (isAppError(error)) {
+    return error
+  }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P2002"
+  ) {
+    return new AppError(
+      ErrorCode.NAME_TAKEN,
+      409,
+      "Un enregistrement avec cette valeur existe déjà."
+    )
+  }
+  return null
+}

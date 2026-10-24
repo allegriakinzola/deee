@@ -60,11 +60,20 @@ export async function writePublicUpload(input: {
   filename: string
   bytes: Buffer
 }): Promise<string> {
+  if (isServerlessFilesystem()) {
+    return imageDataUrl(input.bytes)
+  }
+
   const relativeDir = path.posix.join("uploads", input.directory)
   const absDir = path.join(process.cwd(), "public", ...relativeDir.split("/"))
-  await mkdir(absDir, { recursive: true })
-  await writeFile(path.join(absDir, input.filename), input.bytes)
-  return `/${relativeDir}/${input.filename}`
+  try {
+    await mkdir(absDir, { recursive: true })
+    await writeFile(path.join(absDir, input.filename), input.bytes)
+    return `/${relativeDir}/${input.filename}`
+  } catch (error) {
+    console.error("Écriture fichier impossible, logo conservé en base.", error)
+    return imageDataUrl(input.bytes)
+  }
 }
 
 export async function removePublicUpload(
@@ -75,6 +84,21 @@ export async function removePublicUpload(
     return
   }
   await unlink(abs).catch(() => undefined)
+}
+
+function imageDataUrl(bytes: Buffer): string {
+  const { ext } = inspectImage(bytes)
+  const mime =
+    ext === "jpg" ? "image/jpeg" : ext === "png" ? "image/png" : "image/webp"
+  return `data:${mime};base64,${bytes.toString("base64")}`
+}
+
+function isServerlessFilesystem(): boolean {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.LAMBDA_TASK_ROOT
+  )
 }
 
 function resolveUploadPath(publicPath: string | null): string | null {

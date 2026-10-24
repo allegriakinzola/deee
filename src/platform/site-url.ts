@@ -1,10 +1,19 @@
-/** Origine publique — toujours `NEXT_PUBLIC_SITE_URL` (.env). Jamais de fallback en dur. */
+/** Origine publique — `NEXT_PUBLIC_SITE_URL`, sinon l’URL Vercel. Jamais de localhost en dur. */
 export function getSiteUrl(): string {
-  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "")
-  if (!value) {
-    throw new Error("Variable d'environnement manquante : NEXT_PUBLIC_SITE_URL")
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "")
+  if (configured) {
+    return configured
   }
-  return value
+
+  const vercel =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+    process.env.VERCEL_URL?.trim()
+  if (vercel) {
+    const host = vercel.replace(/^https?:\/\//, "")
+    return `https://${host}`
+  }
+
+  throw new Error("Variable d'environnement manquante : NEXT_PUBLIC_SITE_URL")
 }
 
 export function absoluteUrl(path: string): string {

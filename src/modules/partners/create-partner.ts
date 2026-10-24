@@ -4,6 +4,7 @@ import { z } from "zod"
 
 import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
+import { inspectImage } from "@/platform/uploads"
 
 import { assertCanManagePartners } from "./assert-manager"
 import type { PartnerInvitationResult } from "./contract"
@@ -52,6 +53,10 @@ export async function createPartner(
     )
   }
 
+  if (logoBytes && logoBytes.length > 0) {
+    inspectImage(logoBytes, "logo")
+  }
+
   const slug = slugifyPartnerName(parsed.data.name)
   const existing = await findPartnerBySlug(slug)
   if (existing) {
@@ -71,12 +76,16 @@ export async function createPartner(
   })
 
   if (logoBytes && logoBytes.length > 0) {
-    const logo = await persistPartnerLogo({
-      partnerId: partner.id,
-      bytes: logoBytes,
-      previousLogo: null,
-    })
-    await updatePartnerLogo(partner.id, logo)
+    try {
+      const logo = await persistPartnerLogo({
+        partnerId: partner.id,
+        bytes: logoBytes,
+        previousLogo: null,
+      })
+      await updatePartnerLogo(partner.id, logo)
+    } catch (error) {
+      console.error("Échec d’enregistrement du logo partenaire", error)
+    }
   }
 
   const admin = parsed.data.admin

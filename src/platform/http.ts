@@ -1,4 +1,4 @@
-import { isAppError } from "@/platform/errors"
+import { appErrorFromUnknown } from "@/platform/errors"
 
 export type ApiSuccess<T> = { data: T }
 export type ApiFailure = { error: { code: string; message: string } }
@@ -8,12 +8,13 @@ export function jsonData<T>(data: T, status = 200): Response {
 }
 
 export function jsonError(error: unknown): Response {
-  if (isAppError(error)) {
+  const known = appErrorFromUnknown(error)
+  if (known) {
     return Response.json(
       {
-        error: { code: error.code, message: error.message },
+        error: { code: known.code, message: known.message },
       } satisfies ApiFailure,
-      { status: error.status }
+      { status: known.status }
     )
   }
 
@@ -47,7 +48,7 @@ export async function formFileBytes(
   key: string
 ): Promise<Buffer | null> {
   const value = form.get(key)
-  if (!(value instanceof File) || value.size === 0) {
+  if (!(value instanceof Blob) || value.size === 0) {
     return null
   }
   return Buffer.from(await value.arrayBuffer())

@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { PeriodChart } from "@/components/dashboard/period-chart"
 import { DashboardDataTable } from "@/components/dashboard/data-table"
 import { DashboardStat } from "@/components/dashboard/stat"
@@ -10,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { formatUsd } from "@/lib/money"
+import { displayShopCode } from "@/lib/shop-code"
 import type { PartnerDashboard } from "@/modules/partners"
 
 export function PartnerDashboardView({
@@ -60,57 +63,46 @@ export function PartnerDashboardView({
         />
       </div>
 
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Vos shops</h2>
+            <p className="text-sm text-muted-foreground">
+              Identité, compte et activité des 30 derniers jours
+            </p>
+          </div>
+          <Link
+            href="/partenaire/shops"
+            className="text-sm font-medium underline-offset-4 hover:underline"
+          >
+            Gérer les shops
+          </Link>
+        </div>
+        {data.shopRows.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-sm text-muted-foreground">
+              Aucun shop pour le moment.{" "}
+              <Link
+                href="/partenaire/shops"
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                Créer le premier
+              </Link>
+              .
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {data.shopRows.map((shop) => (
+              <ShopCard key={shop.id} shop={shop} />
+            ))}
+          </div>
+        )}
+      </section>
+
       <Card>
         <CardContent className="pt-5">
           <PeriodChart points={data.daily} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Activité par shop</CardTitle>
-          <CardDescription>
-            Files d’attente et volumes confirmés sur 30 jours
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {data.shopRows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Aucun shop pour le moment.
-            </p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
-                <tr>
-                  <th className="pb-2 font-medium">Shop</th>
-                  <th className="hidden pb-2 font-medium sm:table-cell">
-                    Quartier
-                  </th>
-                  <th className="pb-2 text-right font-medium">Attente</th>
-                  <th className="pb-2 text-right font-medium">Dépôts</th>
-                  <th className="pb-2 text-right font-medium">Échanges</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.shopRows.map((shop) => (
-                  <tr key={shop.id} className="border-t border-border/60">
-                    <td className="py-2.5">
-                      <p>{shop.name}</p>
-                      <p className="text-xs text-muted-foreground sm:hidden">
-                        {shop.area}
-                      </p>
-                    </td>
-                    <td className="hidden py-2.5 sm:table-cell">{shop.area}</td>
-                    <td className="py-2.5 text-right">
-                      {shop.pendingDeposits + shop.pendingRedeems}
-                    </td>
-                    <td className="py-2.5 text-right">{shop.deposits30}</td>
-                    <td className="py-2.5 text-right">{shop.redeems30}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
         </CardContent>
       </Card>
 
@@ -200,6 +192,83 @@ export function PartnerDashboardView({
           )}
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function ShopCard({
+  shop,
+}: {
+  shop: PartnerDashboard["shopRows"][number]
+}) {
+  const pending = shop.pendingDeposits + shop.pendingRedeems
+  const operator =
+    shop.operatorEmail ?? shop.operatorName ?? "Aucun compte"
+
+  return (
+    <Card>
+      <CardHeader className="gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <CardTitle>{shop.name}</CardTitle>
+            <CardDescription>{shop.area}</CardDescription>
+          </div>
+          <Badge variant={shop.status === "ACTIVE" ? "default" : "secondary"}>
+            {shop.status === "ACTIVE" ? "Actif" : "Désactivé"}
+          </Badge>
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <p>
+            <span className="text-muted-foreground">Code </span>
+            <span className="font-mono tracking-wider">
+              {displayShopCode(shop.code)}
+            </span>
+          </p>
+          <p>
+            <span className="text-muted-foreground">Responsable </span>
+            {operator}
+          </p>
+        </div>
+        {shop.operatorAccess && shop.operatorAccess !== "READY" ? (
+          <Badge variant="secondary">Invitation en attente</Badge>
+        ) : null}
+      </CardHeader>
+      <CardContent>
+        <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+          <Metric label="En attente" value={String(pending)} />
+          <Metric
+            label="Dépôts"
+            value={String(shop.deposits30)}
+            hint={`${shop.points30} pts`}
+          />
+          <Metric
+            label="Échanges"
+            value={String(shop.redeems30)}
+            hint={`${shop.bons30} bon${shop.bons30 === 1 ? "" : "s"}`}
+          />
+          <Metric label="Remis" value={formatUsd(shop.usd30)} />
+        </dl>
+      </CardContent>
+    </Card>
+  )
+}
+
+function Metric({
+  label,
+  value,
+  hint,
+}: {
+  label: string
+  value: string
+  hint?: string
+}) {
+  return (
+    <div>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 font-semibold tracking-tight">{value}</dd>
+      {hint ? (
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      ) : null}
     </div>
   )
 }
