@@ -24,7 +24,8 @@ function isCurrentClient(client: PrismaClient): boolean {
     "deposit" in client &&
     "redeem" in client &&
     "ledgerEntry" in client &&
-    "partnerOffer" in client
+    "partnerOffer" in client &&
+    "storedFile" in client
   )
 }
 

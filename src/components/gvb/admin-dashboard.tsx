@@ -50,7 +50,7 @@ export function AdminDashboardView({
         <DashboardStat
           label="Citoyens"
           value={String(data.citizens)}
-          hint={`${data.shopStaff} shops · ${data.partnerAdmins} admins`}
+          hint={`${data.shopStaff} shop${data.shopStaff === 1 ? "" : "s"} · ${data.partnerAdmins} admin${data.partnerAdmins === 1 ? "" : "s"}`}
         />
         <DashboardStat
           label="Matériels actifs"

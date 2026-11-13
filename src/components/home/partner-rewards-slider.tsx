@@ -1,8 +1,9 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+
+import { PartnerLogo } from "@/components/brand/partner-logo"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -48,17 +49,11 @@ export function PartnerRewardsSlider({
                 : "border-border hover:border-primary/60"
             )}
           >
-            {item.logo ? (
-              <Image
-                src={item.logo}
-                alt={item.name}
-                width={100}
-                height={36}
-                className="max-h-7 w-auto object-contain"
-              />
-            ) : (
-              <span className="text-xs font-medium">{item.shortName}</span>
-            )}
+            <PartnerLogo
+              src={item.logo}
+              name={item.shortName}
+              className="max-h-7 w-auto object-contain text-xs"
+            />
           </button>
         ))}
       </div>
@@ -66,17 +61,11 @@ export function PartnerRewardsSlider({
       <Card className="overflow-hidden bg-secondary/70 ring-border">
         <CardContent className="space-y-3 p-6">
           <div className="flex h-16 items-center justify-center rounded-xl bg-white px-4">
-            {partner.logo ? (
-              <Image
-                src={partner.logo}
-                alt={`Logo ${partner.name}`}
-                width={140}
-                height={48}
-                className="max-h-10 w-auto object-contain"
-              />
-            ) : (
-              <span className="text-sm font-semibold">{partner.shortName}</span>
-            )}
+            <PartnerLogo
+              src={partner.logo}
+              name={partner.shortName}
+              className="max-h-10 w-auto object-contain text-sm font-semibold"
+            />
           </div>
           <div className="rounded-xl bg-card px-4 py-4">
             <p className="text-sm text-muted-foreground">{partner.name}</p>

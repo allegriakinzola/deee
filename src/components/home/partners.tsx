@@ -1,6 +1,6 @@
-import Image from "next/image"
 import Link from "next/link"
 
+import { PartnerLogo } from "@/components/brand/partner-logo"
 import type { PublicPartner } from "@/lib/public-directory"
 
 export function Partners({ partners }: { partners: PublicPartner[] }) {
@@ -23,17 +23,11 @@ export function Partners({ partners }: { partners: PublicPartner[] }) {
                   href={`/?partenaire=${partner.id}#shops`}
                   className="flex h-12 items-center justify-center px-6 text-sm font-medium opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0 sm:h-14 sm:px-8"
                 >
-                  {partner.logo ? (
-                    <Image
-                      src={partner.logo}
-                      alt={`Logo ${partner.name}`}
-                      width={140}
-                      height={48}
-                      className="max-h-8 w-auto object-contain sm:max-h-9"
-                    />
-                  ) : (
-                    partner.shortName
-                  )}
+                  <PartnerLogo
+                    src={partner.logo}
+                    name={partner.shortName}
+                    className="max-h-8 w-auto object-contain sm:max-h-9"
+                  />
                 </Link>
               </li>
             ))}

@@ -106,8 +106,11 @@ sockets.on("connection", async (ws, request) => {
   ws.send(JSON.stringify({ type: "live.ready", at: new Date().toISOString() }))
 })
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "")
+
 server.listen(port, () => {
+  const origin = siteUrl || `port ${port}`
   console.log(
-    `DEEE Kinshasa ${dev ? "dev" : "production"} sur http://localhost:${port} (socket /live)`
+    `DEEE Kinshasa ${dev ? "dev" : "production"} sur ${origin} (temps réel /api/v1/live)`
   )
 })

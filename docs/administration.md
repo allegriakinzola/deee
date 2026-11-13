@@ -29,7 +29,7 @@ Les changements se font dans l’application. Il n’y a pas d’accès direct �
 
 1. `npm run db:deploy` applique les migrations.
 2. `npm run build` prépare l’application.
-3. `npm start` lance le site et le socket `/live`. Le citoyen et le shop reçoivent alors la confirmation d’un dépôt ou d’un échange sans recharger la page.
+3. `npm start` lance le site. Le temps réel passe par `GET /api/v1/live`, une requête HTTP que `next start` sait servir. L’adresse socket `/live` répondait 404, parce que Next ne l’expose pas.
 4. `DATABASE_URL` doit être l’adresse poolée Neon. `DIRECT_URL` sert aux migrations.
-5. `NEXT_PUBLIC_SITE_URL` est l’adresse publique, sans slash final, par exemple `https://deee.nexttechnologies.site`.
-6. Le dossier `public/uploads` n’est pas dans git. Il faut le conserver sur le serveur : ce sont les logos et les photos des matériels.
+5. `NEXT_PUBLIC_SITE_URL` se lit dans l’environnement, sans slash final. En local : `http://localhost:3000`. En production : `https://deee.nexttechnologies.site`. Il faut la poser avant `npm run build`.
+6. Les nouveaux logos sont enregistrés en base et restent après un déploiement. Un logo déjà stocké dans `public/uploads` et absent du serveur s’affiche par le nom : il faut le renvoyer.

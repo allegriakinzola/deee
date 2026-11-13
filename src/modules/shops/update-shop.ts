@@ -6,6 +6,10 @@ import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
 
 import { shopAreaSchema } from "./area"
+import {
+  KINSHASA_POSITION_ERROR,
+  kinshasaPositionSchema,
+} from "@/lib/coordinates"
 import { assertCanManageOwnShops } from "./assert-manager"
 import {
   findShopById,
@@ -14,12 +18,29 @@ import {
 } from "./repository"
 import { slugifyShopName } from "./slug"
 
-const updateInputSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  area: shopAreaSchema,
-  lat: z.coerce.number().gte(-90).lte(90),
-  lng: z.coerce.number().gte(-180).lte(180),
-})
+const updateInputSchema = z
+  .object({
+    name: z.string().trim().min(2).max(80),
+    area: shopAreaSchema,
+    lat: z.unknown(),
+    lng: z.unknown(),
+  })
+  .superRefine((value, ctx) => {
+    const position = kinshasaPositionSchema.safeParse({
+      lat: value.lat,
+      lng: value.lng,
+    })
+    if (!position.success) {
+      ctx.addIssue({ code: "custom", message: KINSHASA_POSITION_ERROR })
+    }
+  })
+  .transform((value) => {
+    const position = kinshasaPositionSchema.parse({
+      lat: value.lat,
+      lng: value.lng,
+    })
+    return { ...value, ...position }
+  })
 
 export async function updateShop(
   actor: AuthUser,
@@ -30,10 +51,15 @@ export async function updateShop(
 
   const parsed = updateInputSchema.safeParse(input)
   if (!parsed.success) {
+    const position = parsed.error.issues.some(
+      (issue) => issue.message === KINSHASA_POSITION_ERROR
+    )
     throw new AppError(
       ErrorCode.VALIDATION,
       400,
-      "Indiquez le nom, la commune et la position du shop."
+      position
+        ? KINSHASA_POSITION_ERROR
+        : "Indiquez le nom, la commune et la position du shop."
     )
   }
 

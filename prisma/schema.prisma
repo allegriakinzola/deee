@@ -386,3 +386,11 @@ model LedgerEntry {
   @@unique([depositId, kind])
   @@unique([redeemId, kind])
 }
+
+/// Fichier envoyé (logo, photo). En base pour survivre à un redéploiement.
+model StoredFile {
+  id        String   @id @default(cuid())
+  mime      String
+  bytes     Bytes
+  createdAt DateTime @default(now())
+}

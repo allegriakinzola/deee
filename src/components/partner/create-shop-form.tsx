@@ -88,23 +88,23 @@ export function CreateShopForm({
         />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Latitude" htmlFor="shop-lat">
+        <Field label="Latitude" htmlFor="shop-lat" hint="Exemple : -4,305">
           <Input
             id="shop-lat"
             inputMode="decimal"
             value={lat}
             onChange={(event) => setLat(event.target.value)}
-            placeholder="-4.305"
+            placeholder="-4,305"
             required
           />
         </Field>
-        <Field label="Longitude" htmlFor="shop-lng">
+        <Field label="Longitude" htmlFor="shop-lng" hint="Exemple : 15,313">
           <Input
             id="shop-lng"
             inputMode="decimal"
             value={lng}
             onChange={(event) => setLng(event.target.value)}
-            placeholder="15.313"
+            placeholder="15,313"
             required
           />
         </Field>

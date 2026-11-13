@@ -50,7 +50,7 @@ export function PhonePreview() {
               </p>
             </div>
             <span className="rounded-full bg-white/35 px-2 py-0.5 text-[9px] font-semibold">
-              Seuil 50 pts
+              1 bon = 250 pts
             </span>
           </div>
           <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/35">
@@ -92,7 +92,7 @@ export function PhonePreview() {
           <DepositRow
             icon={RecycleIcon}
             title="Batterie"
-            meta="Vodacom Limete · confirmé"
+            meta="Shop Gombe · confirmé"
             points="+40"
           />
         </div>

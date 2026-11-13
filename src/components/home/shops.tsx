@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import Image from "next/image"
 import { HouseIcon } from "lucide-react"
+
+import { PartnerLogo } from "@/components/brand/partner-logo"
 
 import { ShopsMap } from "@/components/home/shops-map"
 import { buttonVariants } from "@/components/ui/button"
@@ -91,15 +92,12 @@ export function Shops({
                     : "border-border hover:border-primary/60"
                 )}
               >
-                {partner.logo ? (
-                  <Image
-                    src={partner.logo}
-                    alt=""
-                    width={72}
-                    height={24}
-                    className="max-h-5 w-auto object-contain"
-                  />
-                ) : null}
+                <PartnerLogo
+                  src={partner.logo}
+                  name={partner.shortName}
+                  fallback="hide"
+                  className="max-h-5 w-auto object-contain"
+                />
                 {partner.shortName}
               </button>
             )

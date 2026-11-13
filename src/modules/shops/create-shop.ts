@@ -6,6 +6,10 @@ import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
 
 import { shopAreaSchema } from "./area"
+import {
+  KINSHASA_POSITION_ERROR,
+  kinshasaPositionSchema,
+} from "@/lib/coordinates"
 import { assertCanManageOwnShops } from "./assert-manager"
 import type { ShopInvitationResult } from "./contract"
 import { inviteShopStaff } from "./invite-shop-staff"
@@ -13,18 +17,35 @@ import { createShopRecord, findShopByCode, findShopByPartnerSlug } from "./repos
 import { generateShopCode } from "./generate-code"
 import { slugifyShopName } from "./slug"
 
-const createInputSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  area: shopAreaSchema,
-  lat: z.coerce.number().gte(-90).lte(90),
-  lng: z.coerce.number().gte(-180).lte(180),
-  operator: z
-    .object({
-      displayName: z.string().trim().min(2).max(80),
-      email: z.string().trim().min(3),
+const createInputSchema = z
+  .object({
+    name: z.string().trim().min(2).max(80),
+    area: shopAreaSchema,
+    lat: z.unknown(),
+    lng: z.unknown(),
+    operator: z
+      .object({
+        displayName: z.string().trim().min(2).max(80),
+        email: z.string().trim().min(3),
+      })
+      .optional(),
+  })
+  .superRefine((value, ctx) => {
+    const position = kinshasaPositionSchema.safeParse({
+      lat: value.lat,
+      lng: value.lng,
     })
-    .optional(),
-})
+    if (!position.success) {
+      ctx.addIssue({ code: "custom", message: KINSHASA_POSITION_ERROR })
+    }
+  })
+  .transform((value) => {
+    const position = kinshasaPositionSchema.parse({
+      lat: value.lat,
+      lng: value.lng,
+    })
+    return { ...value, ...position }
+  })
 
 export type CreateShopResult = {
   id: string
@@ -41,10 +62,15 @@ export async function createShop(
 
   const parsed = createInputSchema.safeParse(input)
   if (!parsed.success) {
+    const position = parsed.error.issues.some(
+      (issue) => issue.message === KINSHASA_POSITION_ERROR
+    )
     throw new AppError(
       ErrorCode.VALIDATION,
       400,
-      "Indiquez le nom, la commune et la position du shop."
+      position
+        ? KINSHASA_POSITION_ERROR
+        : "Indiquez le nom, la commune et la position du shop."
     )
   }
 

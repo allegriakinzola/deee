@@ -66,7 +66,7 @@ export function EditShopForm({
         />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Latitude" htmlFor="edit-shop-lat">
+        <Field label="Latitude" htmlFor="edit-shop-lat" hint="Exemple : -4,305">
           <Input
             id="edit-shop-lat"
             inputMode="decimal"
@@ -75,7 +75,7 @@ export function EditShopForm({
             required
           />
         </Field>
-        <Field label="Longitude" htmlFor="edit-shop-lng">
+        <Field label="Longitude" htmlFor="edit-shop-lng" hint="Exemple : 15,313">
           <Input
             id="edit-shop-lng"
             inputMode="decimal"

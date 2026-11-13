@@ -1,8 +1,9 @@
 import "server-only"
 
-import { mkdir, unlink, writeFile } from "node:fs/promises"
+import { unlink } from "node:fs/promises"
 import path from "node:path"
 
+import { prisma } from "@/platform/db"
 import { AppError, ErrorCode } from "@/platform/errors"
 
 export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024
@@ -55,50 +56,38 @@ export function inspectImage(
   throw new AppError(ErrorCode.VALIDATION, 400, badType)
 }
 
-export async function writePublicUpload(input: {
-  directory: string
-  filename: string
-  bytes: Buffer
-}): Promise<string> {
-  if (isServerlessFilesystem()) {
-    return imageDataUrl(input.bytes)
-  }
+const MEDIA_PREFIX = "/api/v1/media/"
 
-  const relativeDir = path.posix.join("uploads", input.directory)
-  const absDir = path.join(process.cwd(), "public", ...relativeDir.split("/"))
-  try {
-    await mkdir(absDir, { recursive: true })
-    await writeFile(path.join(absDir, input.filename), input.bytes)
-    return `/${relativeDir}/${input.filename}`
-  } catch (error) {
-    console.error("Écriture fichier impossible, logo conservé en base.", error)
-    return imageDataUrl(input.bytes)
-  }
+export async function writePublicUpload(input: {
+  bytes: Buffer
+  directory?: string
+  filename?: string
+}): Promise<string> {
+  const { ext } = inspectImage(input.bytes)
+  const mime =
+    ext === "jpg" ? "image/jpeg" : ext === "png" ? "image/png" : "image/webp"
+  const stored = await prisma.storedFile.create({
+    data: { mime, bytes: Uint8Array.from(input.bytes) },
+    select: { id: true },
+  })
+  return `${MEDIA_PREFIX}${stored.id}`
 }
 
 export async function removePublicUpload(
   publicPath: string | null
 ): Promise<void> {
+  if (publicPath?.startsWith(MEDIA_PREFIX)) {
+    const id = publicPath.slice(MEDIA_PREFIX.length)
+    if (id) {
+      await prisma.storedFile.delete({ where: { id } }).catch(() => undefined)
+    }
+    return
+  }
   const abs = resolveUploadPath(publicPath)
   if (!abs) {
     return
   }
   await unlink(abs).catch(() => undefined)
-}
-
-function imageDataUrl(bytes: Buffer): string {
-  const { ext } = inspectImage(bytes)
-  const mime =
-    ext === "jpg" ? "image/jpeg" : ext === "png" ? "image/png" : "image/webp"
-  return `data:${mime};base64,${bytes.toString("base64")}`
-}
-
-function isServerlessFilesystem(): boolean {
-  return Boolean(
-    process.env.VERCEL ||
-      process.env.AWS_LAMBDA_FUNCTION_NAME ||
-      process.env.LAMBDA_TASK_ROOT
-  )
 }
 
 function resolveUploadPath(publicPath: string | null): string | null {

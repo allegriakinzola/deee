@@ -7,32 +7,19 @@ export function LiveRefresh() {
   const router = useRouter()
 
   useEffect(() => {
-    let socket: WebSocket | null = null
-    let closed = false
-    let wait = 1000
-    let timer: ReturnType<typeof setTimeout> | undefined
-
-    function connect() {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-      socket = new WebSocket(`${protocol}//${window.location.host}/live`)
-      socket.onopen = () => {
-        wait = 1000
-      }
-      socket.onmessage = () => {
+    const source = new EventSource("/api/v1/live")
+    source.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as { type?: string }
+        if (payload.type && payload.type !== "live.ready") {
+          router.refresh()
+        }
+      } catch {
         router.refresh()
       }
-      socket.onclose = () => {
-        if (closed) return
-        timer = setTimeout(connect, wait)
-        wait = Math.min(wait * 2, 15000)
-      }
     }
-
-    connect()
     return () => {
-      closed = true
-      if (timer) clearTimeout(timer)
-      socket?.close()
+      source.close()
     }
   }, [router])
 

@@ -68,7 +68,7 @@ L’espace citoyen est **responsive**. Sur téléphone, c’est une app (barre d
 
 La GVB n’est pas un partenaire. C’est l’opérateur de la plateforme. Un `GVB_ADMIN` n’appartient pas à un shop.
 
-Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) et un **code unique** (6 caractères, affiché `ABC-DEF`). Le responsable le communique au citoyen au comptoir. Depuis `/shop`, il consulte le tableau de bord et télécharge un **rapport PDF** des 30 derniers jours. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique lit les partenaires et les shops actifs en base. `npm start` sert aussi le socket `/live` : un dépôt ou un échange confirmé rafraîchit le compte citoyen et le shop sans rechargement.
+Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) et un **code unique** (6 caractères, affiché `ABC-DEF`). Le responsable le communique au citoyen au comptoir. Depuis `/shop`, il consulte le tableau de bord et télécharge un **rapport PDF** des 30 derniers jours. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique lit les partenaires et les shops actifs en base. Un dépôt ou un échange confirmé rafraîchit le compte citoyen et le shop par `GET /api/v1/live`, sans rechargement.
 
 Les **matériels** sont gérés par la GVB (`/admin/materiels`), sans catalogue intermédiaire. La catégorie est précodée ; le nom et les points sont en base. Les points se convertissent en USD, puis en **bons**. Un bon est le **ticket minimum** pour échanger : sa valeur se règle dans **Paramètres** (`/admin/parametres`), **1 bon = 10 USD** par défaut (250 points si 1 pt = 0,04 USD).
 
