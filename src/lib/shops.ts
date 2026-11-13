@@ -327,21 +327,15 @@ export function shopsForPartner(partnerId: PartnerId | null) {
 export function rewardCopy(partner: Partner) {
   if (partner.kind === "telecom") {
     return {
-      title: "Crédit ou mégas",
+      title: "Forfait data ou appels",
       detail:
-        "Les points s’échangent en shop contre du crédit ou des mégas. Le responsable confirme, puis vous remet la récompense.",
-    }
-  }
-
-  if (partner.kind === "bank") {
-    return {
-      title: `Services ${partner.shortName}`,
-      detail: `Vos points s’échangent contre des services ${partner.shortName}, comme l’achat d’une carte ${partner.shortName}, ou contre de l’argent.`,
+        "Les points s’échangent en shop contre un forfait data ou un forfait appels. Le responsable confirme, puis vous remet la récompense.",
     }
   }
 
   return {
-    title: `Produits ${partner.shortName}`,
-    detail: `Vos points s’échangent contre des produits ${partner.shortName}, en shop, avec le responsable.`,
+    title: "Goodies",
+    detail:
+      "Les points s’échangent contre un t-shirt, un képi ou une powerbank. Le responsable confirme, puis vous remet l’objet.",
   }
 }

@@ -7,34 +7,36 @@ import { HouseIcon } from "lucide-react"
 
 import { ShopsMap } from "@/components/home/shops-map"
 import { buttonVariants } from "@/components/ui/button"
-import {
-  PARTNERS,
-  partnerName,
-  shopsForPartner,
-  type PartnerId,
-} from "@/lib/shops"
+import type { PublicPartner, PublicShop } from "@/lib/public-directory"
 import { cn } from "@/lib/utils"
 
-function isPartnerId(value: string | null): value is PartnerId {
-  return PARTNERS.some((partner) => partner.id === value)
-}
-
-export function Shops() {
+export function Shops({
+  partners,
+  shops,
+}: {
+  partners: PublicPartner[]
+  shops: PublicShop[]
+}) {
   const searchParams = useSearchParams()
-  const [partnerId, setPartnerId] = useState<PartnerId | null>(null)
+  const [partnerId, setPartnerId] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
     const fromUrl = searchParams.get("partenaire")
-    if (isPartnerId(fromUrl)) {
+    if (fromUrl && partners.some((partner) => partner.id === fromUrl)) {
       setPartnerId(fromUrl)
       setSelectedId(null)
     }
-  }, [searchParams])
+  }, [partners, searchParams])
 
-  const shops = useMemo(() => shopsForPartner(partnerId), [partnerId])
+  const visibleShops = useMemo(
+    () =>
+      partnerId ? shops.filter((shop) => shop.partnerId === partnerId) : shops,
+    [partnerId, shops]
+  )
+  const names = partners.map((partner) => partner.shortName).join(", ")
 
-  function choosePartner(id: PartnerId | null) {
+  function choosePartner(id: string | null) {
     setPartnerId(id)
     setSelectedId(null)
   }
@@ -53,9 +55,11 @@ export function Shops() {
             Nos shops
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Vodacom, Airtel, Orange, Equity BCDC, Rawbank et Bracongo ont chacun
-            leurs points de collecte. Choisissez un partenaire, ou laissez « Tous »
-            pour les voir tous sur la carte.
+            {names
+              ? `${names} ont chacun leurs points de collecte.`
+              : "Les points de collecte apparaîtront ici dès qu’un shop est actif."}{" "}
+            Choisissez un partenaire, ou laissez « Tous » pour les voir tous sur
+            la carte.
           </p>
         </div>
 
@@ -73,7 +77,7 @@ export function Shops() {
           >
             Tous
           </button>
-          {PARTNERS.map((partner) => {
+          {partners.map((partner) => {
             const active = partnerId === partner.id
             return (
               <button
@@ -87,13 +91,15 @@ export function Shops() {
                     : "border-border hover:border-primary/60"
                 )}
               >
-                <Image
-                  src={partner.logo}
-                  alt=""
-                  width={72}
-                  height={24}
-                  className="max-h-5 w-auto object-contain"
-                />
+                {partner.logo ? (
+                  <Image
+                    src={partner.logo}
+                    alt=""
+                    width={72}
+                    height={24}
+                    className="max-h-5 w-auto object-contain"
+                  />
+                ) : null}
                 {partner.shortName}
               </button>
             )
@@ -102,7 +108,12 @@ export function Shops() {
 
         <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,300px)_1fr] lg:items-stretch">
           <ul className="flex max-h-[480px] flex-col gap-2 overflow-y-auto pr-1">
-            {shops.map((shop) => {
+            {visibleShops.length === 0 ? (
+              <li className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                Aucun shop actif pour cette sélection.
+              </li>
+            ) : null}
+            {visibleShops.map((shop) => {
               const active = shop.id === selectedId
               return (
                 <li key={shop.id}>
@@ -127,7 +138,7 @@ export function Shops() {
                         {shop.name}
                       </span>
                       <span className="mt-0.5 block text-sm text-muted-foreground">
-                        {partnerName(shop.partnerId)} · {shop.area}
+                        {shop.partnerName} · {shop.area}
                       </span>
                     </span>
                   </button>
@@ -138,7 +149,7 @@ export function Shops() {
 
           <div className="min-h-[360px] overflow-hidden rounded-3xl border border-border bg-card lg:min-h-[480px]">
             <ShopsMap
-              shops={shops}
+              shops={visibleShops}
               selectedId={selectedId}
               onSelect={setSelectedId}
             />

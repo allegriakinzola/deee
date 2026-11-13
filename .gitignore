@@ -38,6 +38,9 @@ yarn-error.log*
 # logos partenaires uploadés
 /public/uploads
 
+# notes de campagne (document local)
+/Remarques sur l'application de la campagne.pdf
+
 # generated
 /src/generated
 

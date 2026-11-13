@@ -35,7 +35,11 @@ export function PartnerDashboardView({
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           {partnerName}. Activité de vos shops sur 30 jours, sauf mention
-          contraire.
+          contraire. Les récompenses proposées au citoyen se règlent dans{" "}
+          <Link href="/partenaire/offres" className="font-medium text-foreground underline">
+            Offres
+          </Link>
+          .
         </p>
       </div>
 

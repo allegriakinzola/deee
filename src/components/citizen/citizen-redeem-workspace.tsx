@@ -6,7 +6,7 @@ import { MinusIcon, PlusIcon } from "lucide-react"
 
 import { getJson, postJson } from "@/lib/api"
 import { formatUsd } from "@/lib/money"
-import { kindLabel } from "@/lib/redeem-rewards"
+import { rewardKindLabel } from "@/lib/reward-offers"
 import { displayShopCode, normalizeShopCode } from "@/lib/shop-code"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -174,9 +174,14 @@ export function CitizenRedeemWorkspace({
         {offers ? (
           <div className="mt-4 space-y-2">
             <p className="text-sm font-medium text-zinc-900">
-              {offers.partnerName} · {kindLabel(offers.partnerKind)}
+              {offers.partnerName} · {rewardKindLabel(offers.rewardKind)}
             </p>
             <p className="text-[13px] text-zinc-500">{offers.shopName}</p>
+            {offers.rewards.length === 0 ? (
+              <p className="text-sm text-zinc-500">
+                Ce partenaire n’a pas encore d’offre d’échange.
+              </p>
+            ) : null}
             <ul className="space-y-2">
               {offers.rewards.map((reward) => (
                 <li key={reward.id}>

@@ -6,6 +6,7 @@ import { normalizeShopCode } from "@/lib/shop-code"
 import type { AuthUser } from "@/modules/auth"
 import { findActiveShopByCode } from "@/modules/shops"
 import { AppError, ErrorCode } from "@/platform/errors"
+import { publishLive, shopChannel, userChannel } from "@/platform/live"
 
 import { assertCitizen } from "./assert-citizen"
 import type { DirectoryDeposit } from "./contract"
@@ -61,5 +62,9 @@ export async function sendDraftToShop(
       "Cette liste a déjà été envoyée."
     )
   }
+  publishLive([userChannel(actor.id), shopChannel(shop.id)], {
+    type: "deposit.sent",
+    at: new Date().toISOString(),
+  })
   return toDirectoryDeposit(sent)
 }

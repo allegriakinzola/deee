@@ -14,6 +14,7 @@ export async function POST(request: Request) {
         name: formString(form, "name"),
         shortName: formString(form, "shortName"),
         kind: formString(form, "kind"),
+        rewardKind: formString(form, "rewardKind") || undefined,
         admin:
           adminDisplayName || adminEmail
             ? { displayName: adminDisplayName, email: adminEmail }

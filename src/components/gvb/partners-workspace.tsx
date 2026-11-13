@@ -24,6 +24,7 @@ import { InvitePartnerAdminForm } from "@/components/gvb/invite-partner-admin-fo
 import { SetPartnerLogoForm } from "@/components/gvb/set-partner-logo-form"
 import {
   KIND_LABELS,
+  REWARD_LABELS,
   adminSummary,
   filterDirectoryPartners,
   initials,
@@ -239,6 +240,9 @@ export function PartnersWorkspace({
                 </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">Type</th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
+                  Récompense
+                </th>
+                <th className="px-4 py-3 font-medium whitespace-nowrap">
                   Administrateurs
                 </th>
                 <th className="px-4 py-3 font-medium whitespace-nowrap">
@@ -253,7 +257,7 @@ export function PartnersWorkspace({
               {visible.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-16 text-center text-muted-foreground"
                   >
                     Aucun partenaire ne correspond à cette vue.
@@ -292,6 +296,9 @@ export function PartnersWorkspace({
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {KIND_LABELS[partner.kind]}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {REWARD_LABELS[partner.rewardKind]}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <p>{adminSummary(partner)}</p>
@@ -353,7 +360,7 @@ export function PartnersWorkspace({
                     ? "Un e-mail d’activation a été envoyé à l’administrateur. Vous pouvez aussi copier le lien."
                     : "L’e-mail n’a pas pu partir. Copiez le lien et transmettez-le à l’administrateur."
                   : "L’entreprise est enregistrée. Invitez un administrateur quand vous serez prêt."
-                : "Télécom, banque ou produits. L’administrateur d’entreprise est facultatif à la création."}
+                : "Choisissez le secteur et la récompense de ses shops. L’administrateur est facultatif."}
             </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">

@@ -68,13 +68,13 @@ L’espace citoyen est **responsive**. Sur téléphone, c’est une app (barre d
 
 La GVB n’est pas un partenaire. C’est l’opérateur de la plateforme. Un `GVB_ADMIN` n’appartient pas à un shop.
 
-Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) et un **code unique** (6 caractères, affiché `ABC-DEF`). Le responsable le communique au citoyen au comptoir. Depuis `/shop`, il consulte le tableau de bord et télécharge un **rapport PDF** des 30 derniers jours. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique (`lib/shops.ts`) reste statique.
+Les **partenaires** créent et gèrent leurs shops. Un shop = un login (`SHOP_STAFF`) et un **code unique** (6 caractères, affiché `ABC-DEF`). Le responsable le communique au citoyen au comptoir. Depuis `/shop`, il consulte le tableau de bord et télécharge un **rapport PDF** des 30 derniers jours. La GVB consulte le réseau (`/admin/shops`) sans action pour l’instant. La vitrine publique lit les partenaires et les shops actifs en base. `npm start` sert aussi le socket `/live` : un dépôt ou un échange confirmé rafraîchit le compte citoyen et le shop sans rechargement.
 
 Les **matériels** sont gérés par la GVB (`/admin/materiels`), sans catalogue intermédiaire. La catégorie est précodée ; le nom et les points sont en base. Les points se convertissent en USD, puis en **bons**. Un bon est le **ticket minimum** pour échanger : sa valeur se règle dans **Paramètres** (`/admin/parametres`), **1 bon = 10 USD** par défaut (250 points si 1 pt = 0,04 USD).
 
 Un **dépôt** suit : brouillon citoyen (`DRAFT`) → envoi au shop via le code (`SENT`) → confirmation ou refus du responsable. Les points ne sont crédités au citoyen **qu’à la confirmation**, dans la même transaction SQL que le passage à `CONFIRMED` (`LedgerEntry` / `DEPOSIT_CREDIT`). Le shop n’est pas crédité au dépôt.
 
-Un **échange** suit : le citoyen envoie une demande (`SENT`) avec un nombre de bons et le code shop, dès qu’il a au moins 1 bon disponible (les demandes en attente réservent les points). Le responsable confirme ou refuse. Les points ne sont débités **qu’à la confirmation** (`LedgerEntry` / `REDEEM_DEBIT`, montant négatif). Le shop n’est pas crédité.
+Un **échange** suit : le citoyen envoie une demande (`SENT`) avec un nombre de bons, le code shop et une offre de ce partenaire, dès qu’il a au moins 1 bon disponible (les demandes en attente réservent les points). Le type de récompense est propre au partenaire : forfait (data, appels) pour un télécom, produit physique (t-shirt, képi, powerbank) pour les autres, ou un service. L’administrateur du partenaire crée, modifie et retire ces offres dans `/partenaire/offres`. Le responsable de shop confirme ou refuse. Les points ne sont débités **qu’à la confirmation** (`LedgerEntry` / `REDEEM_DEBIT`, montant négatif). Le shop n’est pas crédité.
 
 ## API
 
@@ -91,7 +91,7 @@ Un **échange** suit : le citoyen envoie une demande (`SENT`) avec un nombre de 
 | `users` | Compte, rôle, statut ; invitations ; inscription citoyenne |
 | `auth` | Mot de passe, session, login / logout |
 | `access` | Où chaque rôle atterrit, qui entre où |
-| `partners` | Entreprises partenaires, équipe administrateurs |
+| `partners` | Entreprises partenaires, type de récompense, offres, équipe administrateurs |
 | `shops` | Points de dépôt (créés par le partenaire ; code unique ; GVB consulte) |
 | `catalog` | Conversion points ↔ USD / bons |
 | `materials` | Matériels DEEE (GVB) |

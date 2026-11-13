@@ -1,7 +1,7 @@
 import { Logo } from "@/components/brand/logo"
-import { PARTNERS } from "@/lib/shops"
+import type { PublicPartner } from "@/lib/public-directory"
 
-export function SiteFooter() {
+export function SiteFooter({ partners }: { partners: PublicPartner[] }) {
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 sm:flex-row sm:items-start sm:justify-between">
@@ -57,7 +57,7 @@ export function SiteFooter() {
           <div>
             <p className="font-medium">Partenaires</p>
             <ul className="mt-3 space-y-2 text-muted-foreground">
-              {PARTNERS.map((partner) => (
+              {partners.map((partner) => (
                 <li key={partner.id}>{partner.name}</li>
               ))}
             </ul>
@@ -66,7 +66,8 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border">
         <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} DEEE Kinshasa
+          © {new Date().getFullYear()} DEEE Kinshasa — déchets électriques et
+          électroniques
         </p>
       </div>
     </footer>

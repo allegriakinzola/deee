@@ -33,6 +33,9 @@ export function AuthShell({
             <p className="text-sm font-medium tracking-[0.2em] text-white/70 uppercase">
               DEEE Kinshasa
             </p>
+            <p className="mt-2 text-sm text-white/75">
+              Déchets électriques et électroniques
+            </p>
             <p className="mt-4 text-4xl font-semibold tracking-tight text-balance lg:text-5xl lg:leading-[1.1]">
               Gagnez des points.
               <br />
@@ -40,7 +43,7 @@ export function AuthShell({
             </p>
             <p className="mt-5 text-base leading-relaxed text-white/75">
               Déposez vos appareils en shop, cumulez des points, et échangez-les
-              contre du crédit, un produit ou un service.
+              contre un forfait, un goodie ou un service.
             </p>
           </div>
         </div>

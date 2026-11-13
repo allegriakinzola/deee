@@ -4,6 +4,7 @@
 export type {
   CitizenRedeemQuote,
   DirectoryRedeem,
+  ShopRedeemOffer,
   ShopRedeemOffers,
 } from "./contract"
 export { getCitizenRedeemQuote } from "./get-quote"

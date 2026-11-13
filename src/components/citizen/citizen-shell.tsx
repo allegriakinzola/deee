@@ -43,7 +43,7 @@ export function CitizenShell({
             <div className="min-w-0">
               <p className="text-[13px] text-zinc-500">Mbote, {firstName}</p>
               <p className="truncate text-[17px] font-semibold tracking-tight text-zinc-900">
-                DEEE Kinshasa
+                Déchets électriques et électroniques
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -65,7 +65,9 @@ export function CitizenShell({
         </header>
 
         <header className="hidden shrink-0 items-center justify-between border-b border-zinc-200/80 bg-white/90 px-8 py-3.5 backdrop-blur-md lg:flex">
-          <p className="text-sm text-zinc-500">DEEE Kinshasa — mon compte</p>
+          <p className="text-sm text-zinc-500">
+            Déchets électriques et électroniques — mon compte
+          </p>
           <div className="flex items-center gap-2">
             <Link
               href="/"

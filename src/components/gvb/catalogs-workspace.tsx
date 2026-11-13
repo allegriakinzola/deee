@@ -130,7 +130,7 @@ export function CatalogsWorkspace({
             >
               Paramètres
             </Link>
-            — et s’échange en shop contre du crédit ou une autre récompense.
+            — et s’échange en shop contre un forfait, un goodie ou un service.
           </p>
         </div>
         <Button

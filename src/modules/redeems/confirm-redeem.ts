@@ -2,6 +2,7 @@ import "server-only"
 
 import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
+import { publishLive, shopChannel, userChannel } from "@/platform/live"
 
 import { assertShopStaff } from "./assert-shop"
 import type { DirectoryRedeem } from "./contract"
@@ -44,5 +45,9 @@ export async function confirmShopRedeem(
       "Le solde du citoyen est insuffisant pour confirmer cet échange."
     )
   }
+  publishLive(
+    [userChannel(existing.citizenId), shopChannel(shopId)],
+    { type: "redeem.confirmed", at: new Date().toISOString() }
+  )
   return toDirectoryRedeem(result.redeem)
 }

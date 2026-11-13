@@ -32,6 +32,7 @@ const partnerSelect = {
   shortName: true,
   logo: true,
   kind: true,
+  rewardKind: true,
   status: true,
 } as const
 
@@ -54,6 +55,36 @@ export async function countShops(input?: {
     where: {
       ...(input?.partnerId ? { partnerId: input.partnerId } : {}),
       ...(input?.status ? { status: input.status } : {}),
+    },
+  })
+}
+
+export async function listActivePublicPartners() {
+  return prisma.partner.findMany({
+    where: { status: "ACTIVE" },
+    orderBy: { name: "asc" },
+    select: {
+      slug: true,
+      name: true,
+      shortName: true,
+      logo: true,
+      kind: true,
+      rewardKind: true,
+    },
+  })
+}
+
+export async function listActivePublicShops() {
+  return prisma.shop.findMany({
+    where: { status: "ACTIVE", partner: { status: "ACTIVE" } },
+    orderBy: [{ partner: { name: "asc" } }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      area: true,
+      lat: true,
+      lng: true,
+      partner: { select: { slug: true, shortName: true } },
     },
   })
 }

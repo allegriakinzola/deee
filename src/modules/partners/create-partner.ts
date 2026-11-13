@@ -6,6 +6,8 @@ import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
 import { inspectImage } from "@/platform/uploads"
 
+import { defaultRewardKind } from "@/lib/reward-offers"
+
 import { assertCanManagePartners } from "./assert-manager"
 import type { PartnerInvitationResult } from "./contract"
 import { invitePartnerAdmin } from "./invite-partner-admin"
@@ -18,11 +20,13 @@ import {
 import { slugifyPartnerName } from "./slug"
 
 const KINDS = ["TELECOM", "BANK", "PRODUCTS"] as const
+const REWARD_KINDS = ["FORFAIT", "PRODUIT", "SERVICE"] as const
 
 const createInputSchema = z.object({
   name: z.string().trim().min(2).max(80),
   shortName: z.string().trim().min(2).max(40),
   kind: z.enum(KINDS),
+  rewardKind: z.enum(REWARD_KINDS).optional(),
   admin: z
     .object({
       displayName: z.string().trim().min(2).max(80),
@@ -72,6 +76,8 @@ export async function createPartner(
     shortName: parsed.data.shortName,
     slug,
     kind: parsed.data.kind,
+    rewardKind:
+      parsed.data.rewardKind ?? defaultRewardKind(parsed.data.kind),
     logo: null,
   })
 

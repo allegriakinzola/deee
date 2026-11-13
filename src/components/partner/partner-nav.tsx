@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   RecycleIcon,
   SparklesIcon,
+  GiftIcon,
   StoreIcon,
   UserCogIcon,
 } from "lucide-react"
@@ -18,6 +19,7 @@ const ITEMS = [
     icon: UserCogIcon,
   },
   { href: "/partenaire/shops", label: "Shops", icon: StoreIcon },
+  { href: "/partenaire/offres", label: "Offres", icon: GiftIcon },
   {
     href: "/partenaire/depots",
     label: "Dépôts",

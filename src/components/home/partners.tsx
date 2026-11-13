@@ -1,11 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { PARTNERS } from "@/lib/shops"
+import type { PublicPartner } from "@/lib/public-directory"
 
-const LOOP = [...PARTNERS, ...PARTNERS]
-
-export function Partners() {
+export function Partners({ partners }: { partners: PublicPartner[] }) {
+  const loop = partners.length > 0 ? [...partners, ...partners] : []
   return (
     <section
       id="partenaires"
@@ -18,19 +17,23 @@ export function Partners() {
 
         <div className="partner-marquee-wrap mt-8">
           <ul className="partner-marquee">
-            {LOOP.map((partner, index) => (
+            {loop.map((partner, index) => (
               <li key={`${partner.id}-${index}`} className="shrink-0">
                 <Link
                   href={`/?partenaire=${partner.id}#shops`}
-                  className="flex h-12 items-center justify-center px-6 opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0 sm:h-14 sm:px-8"
+                  className="flex h-12 items-center justify-center px-6 text-sm font-medium opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0 sm:h-14 sm:px-8"
                 >
-                  <Image
-                    src={partner.logo}
-                    alt={`Logo ${partner.name}`}
-                    width={140}
-                    height={48}
-                    className="max-h-8 w-auto object-contain sm:max-h-9"
-                  />
+                  {partner.logo ? (
+                    <Image
+                      src={partner.logo}
+                      alt={`Logo ${partner.name}`}
+                      width={140}
+                      height={48}
+                      className="max-h-8 w-auto object-contain sm:max-h-9"
+                    />
+                  ) : (
+                    partner.shortName
+                  )}
                 </Link>
               </li>
             ))}

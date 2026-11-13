@@ -4,6 +4,7 @@ import { z } from "zod"
 
 import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
+import { publishLive, shopChannel, userChannel } from "@/platform/live"
 
 import { assertShopStaff } from "./assert-shop"
 import type { DirectoryDeposit } from "./contract"
@@ -80,5 +81,9 @@ export async function confirmShopDeposit(
       "Cette demande n’est plus en attente."
     )
   }
+  publishLive(
+    [userChannel(existing.citizenId), shopChannel(shopId)],
+    { type: "deposit.confirmed", at: new Date().toISOString() }
+  )
   return toDirectoryDeposit(confirmed)
 }

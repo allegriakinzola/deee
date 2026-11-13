@@ -6,22 +6,35 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { PARTNERS, rewardCopy } from "@/lib/shops"
+import { rewardCopy, type PublicPartner } from "@/lib/public-directory"
 import { cn } from "@/lib/utils"
 
-export function PartnerRewardsSlider() {
+export function PartnerRewardsSlider({
+  partners,
+}: {
+  partners: PublicPartner[]
+}) {
   const [index, setIndex] = useState(0)
-  const partner = PARTNERS[index]
-  const copy = rewardCopy(partner)
+  const partner = partners[index]
+  const copy = partner ? rewardCopy(partner) : null
 
   function go(next: number) {
-    setIndex((next + PARTNERS.length) % PARTNERS.length)
+    if (partners.length === 0) return
+    setIndex((next + partners.length) % partners.length)
+  }
+
+  if (!partner || !copy) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Les récompenses des partenaires s’afficheront ici.
+      </p>
+    )
   }
 
   return (
     <div>
       <div className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
-        {PARTNERS.map((item, i) => (
+        {partners.map((item, i) => (
           <button
             key={item.id}
             type="button"
@@ -35,13 +48,17 @@ export function PartnerRewardsSlider() {
                 : "border-border hover:border-primary/60"
             )}
           >
-            <Image
-              src={item.logo}
-              alt={item.name}
-              width={100}
-              height={36}
-              className="max-h-7 w-auto object-contain"
-            />
+            {item.logo ? (
+              <Image
+                src={item.logo}
+                alt={item.name}
+                width={100}
+                height={36}
+                className="max-h-7 w-auto object-contain"
+              />
+            ) : (
+              <span className="text-xs font-medium">{item.shortName}</span>
+            )}
           </button>
         ))}
       </div>
@@ -49,13 +66,17 @@ export function PartnerRewardsSlider() {
       <Card className="overflow-hidden bg-secondary/70 ring-border">
         <CardContent className="space-y-3 p-6">
           <div className="flex h-16 items-center justify-center rounded-xl bg-white px-4">
-            <Image
-              src={partner.logo}
-              alt={`Logo ${partner.name}`}
-              width={140}
-              height={48}
-              className="max-h-10 w-auto object-contain"
-            />
+            {partner.logo ? (
+              <Image
+                src={partner.logo}
+                alt={`Logo ${partner.name}`}
+                width={140}
+                height={48}
+                className="max-h-10 w-auto object-contain"
+              />
+            ) : (
+              <span className="text-sm font-semibold">{partner.shortName}</span>
+            )}
           </div>
           <div className="rounded-xl bg-card px-4 py-4">
             <p className="text-sm text-muted-foreground">{partner.name}</p>

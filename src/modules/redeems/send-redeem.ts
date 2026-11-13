@@ -2,11 +2,12 @@ import "server-only"
 
 import { z } from "zod"
 
-import { findReward } from "@/lib/redeem-rewards"
 import { normalizeShopCode } from "@/lib/shop-code"
 import type { AuthUser } from "@/modules/auth"
+import { findPartnerRedeemOffer } from "@/modules/partners"
 import { findActiveShopByCode } from "@/modules/shops"
 import { AppError, ErrorCode } from "@/platform/errors"
+import { publishLive, shopChannel, userChannel } from "@/platform/live"
 
 import { assertCitizen } from "./assert-citizen"
 import type { DirectoryRedeem } from "./contract"
@@ -63,15 +64,23 @@ export async function sendCitizenRedeem(
     )
   }
 
-  const reward = findReward(parsed.data.rewardId)
-  if (!reward || reward.partnerKind !== shop.partner.kind) {
+  const reward = await findPartnerRedeemOffer(
+    shop.partner.id,
+    parsed.data.rewardId,
+    shop.partner.rewardKind
+  )
+  if (!reward) {
     throw new AppError(
       ErrorCode.VALIDATION,
       400,
-      "Choisissez un objet d’échange proposé par ce shop."
+      "Choisissez un objet d’échange proposé par ce partenaire."
     )
   }
 
+  const unitUsd = Number(quote.bonUsdValue)
+  const usdValue = (
+    (Number.isFinite(unitUsd) ? unitUsd : 0) * parsed.data.bons
+  ).toFixed(2)
   const created = await createSentRedeemRecord({
     citizenId: actor.id,
     shopId: shop.id,
@@ -79,8 +88,8 @@ export async function sendCitizenRedeem(
     points: parsed.data.bons * quote.pointsPerBon,
     rewardId: reward.id,
     rewardLabel: reward.label,
-    partnerKind: reward.partnerKind,
-    usdValue: String(reward.usd * parsed.data.bons),
+    partnerKind: shop.partner.kind,
+    usdValue,
   })
   if (!created) {
     throw new AppError(
@@ -89,5 +98,9 @@ export async function sendCitizenRedeem(
       "Vos points disponibles ont changé. Actualisez et réessayez."
     )
   }
+  publishLive([userChannel(actor.id), shopChannel(shop.id)], {
+    type: "redeem.sent",
+    at: new Date().toISOString(),
+  })
   return toDirectoryRedeem(created)
 }

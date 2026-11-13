@@ -7,12 +7,21 @@ import { postForm } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Field, Input } from "@/components/ui/input"
 import { PartnerLogoField } from "@/components/gvb/partner-logo-field"
+import {
+  REWARD_KINDS,
+  defaultOfferLabels,
+  defaultRewardKind,
+  rewardKindExamples,
+  rewardKindLabel,
+  type PartnerSector,
+  type RewardKind,
+} from "@/lib/reward-offers"
 import type { PartnerInvitationResult } from "@/modules/partners"
 
 const KINDS = [
-  { value: "TELECOM", label: "Télécom — crédit ou mégas" },
-  { value: "BANK", label: "Banque — services ou argent" },
-  { value: "PRODUCTS", label: "Produits — articles en shop" },
+  { value: "TELECOM", label: "Télécom" },
+  { value: "BANK", label: "Banque" },
+  { value: "PRODUCTS", label: "Produits" },
 ] as const
 
 export type PartnerCreated = {
@@ -29,7 +38,8 @@ export function CreatePartnerForm({
   const router = useRouter()
   const [name, setName] = useState("")
   const [shortName, setShortName] = useState("")
-  const [kind, setKind] = useState<(typeof KINDS)[number]["value"]>("TELECOM")
+  const [kind, setKind] = useState<PartnerSector>("TELECOM")
+  const [rewardKind, setRewardKind] = useState<RewardKind>("FORFAIT")
   const [adminName, setAdminName] = useState("")
   const [adminEmail, setAdminEmail] = useState("")
   const [logo, setLogo] = useState<File | null>(null)
@@ -45,6 +55,7 @@ export function CreatePartnerForm({
     body.append("name", name)
     body.append("shortName", shortName)
     body.append("kind", kind)
+    body.append("rewardKind", rewardKind)
     if (adminName.trim().length > 0 || adminEmail.trim().length > 0) {
       body.append("adminDisplayName", adminName)
       body.append("adminEmail", adminEmail)
@@ -98,22 +109,45 @@ export function CreatePartnerForm({
         />
       </Field>
       <Field
-        label="Type"
+        label="Secteur"
         htmlFor="partner-kind"
-        hint="Détermine le type de récompense en shop."
+        hint="Télécom, banque ou produits."
       >
         <select
           id="partner-kind"
           name="kind"
           value={kind}
-          onChange={(event) =>
-            setKind(event.target.value as (typeof KINDS)[number]["value"])
-          }
+          onChange={(event) => {
+            const next = event.target.value as PartnerSector
+            setKind(next)
+            setRewardKind(defaultRewardKind(next))
+          }}
           className="h-12 w-full rounded-2xl border border-transparent bg-muted/70 px-4 text-sm outline-none hover:bg-muted focus-visible:border-ring focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           {KINDS.map((item) => (
             <option key={item.value} value={item.value}>
               {item.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field
+        label="Récompense"
+        htmlFor="partner-reward"
+        hint={`Offres : ${defaultOfferLabels(rewardKind).join(", ")}.`}
+      >
+        <select
+          id="partner-reward"
+          name="rewardKind"
+          value={rewardKind}
+          onChange={(event) =>
+            setRewardKind(event.target.value as RewardKind)
+          }
+          className="h-12 w-full rounded-2xl border border-transparent bg-muted/70 px-4 text-sm outline-none hover:bg-muted focus-visible:border-ring focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          {REWARD_KINDS.map((item) => (
+            <option key={item} value={item}>
+              {rewardKindLabel(item)} — {rewardKindExamples(item)}
             </option>
           ))}
         </select>

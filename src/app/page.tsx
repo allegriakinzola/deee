@@ -6,6 +6,7 @@ import { Partners } from "@/components/home/partners"
 import { PromiseSection } from "@/components/home/promise"
 import { Rewards } from "@/components/home/rewards"
 import { Shops } from "@/components/home/shops"
+import { listPublicDirectory } from "@/modules/shops"
 import { SiteFooter } from "@/components/layout/site-footer"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SectionMesh } from "@/components/layout/section-mesh"
@@ -14,24 +15,26 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Suspense } from "react"
 
-export default function Home() {
+export default async function Home() {
+  const directory = await listPublicDirectory()
+
   return (
     <>
       <SiteHeader />
       <main className="flex-1">
         <Hero />
         <PromiseSection />
-        <Partners />
+        <Partners partners={directory.partners} />
         <HowItWorks />
         <Catalog />
-        <Rewards />
+        <Rewards partners={directory.partners} />
         <Suspense>
-          <Shops />
+          <Shops partners={directory.partners} shops={directory.shops} />
         </Suspense>
         <Faq />
         <ClosingCta />
       </main>
-      <SiteFooter />
+      <SiteFooter partners={directory.partners} />
     </>
   )
 }

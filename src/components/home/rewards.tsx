@@ -1,4 +1,5 @@
 import { PartnerRewardsSlider } from "@/components/home/partner-rewards-slider"
+import type { PublicPartner } from "@/lib/public-directory"
 import { SectionMesh } from "@/components/layout/section-mesh"
 
 const RULES = [
@@ -12,7 +13,7 @@ const RULES = [
   },
 ]
 
-export function Rewards() {
+export function Rewards({ partners }: { partners: PublicPartner[] }) {
   return (
     <section id="points" className="relative isolate scroll-mt-20 overflow-hidden">
       <SectionMesh />
@@ -25,8 +26,9 @@ export function Rewards() {
             Vos points, échangés en shop — pas en ligne
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Vodacom, Airtel et Orange : crédit ou mégas. Equity BCDC et Rawbank :
-            services ou argent. Bracongo : produits. L’échange se fait en shop,
+            Un télécom échange les points contre un forfait data ou appels. Les
+            autres partenaires les échangent contre un goodie ou un service,
+            selon les offres qu’ils ont choisies. L’échange se fait en shop,
             avec le responsable.
           </p>
           <ul className="mt-8 space-y-3">
@@ -44,7 +46,7 @@ export function Rewards() {
           </ul>
         </div>
 
-        <PartnerRewardsSlider />
+        <PartnerRewardsSlider partners={partners} />
       </div>
     </section>
   )

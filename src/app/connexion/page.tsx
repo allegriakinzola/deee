@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/modules/auth"
 export const metadata: Metadata = {
   title: "Connexion",
   description:
-    "Connectez-vous à DEEE Kinshasa avec votre e-mail et votre mot de passe.",
+    "Connectez-vous à DEEE Kinshasa, la collecte des déchets électriques et électroniques, avec votre e-mail et votre mot de passe.",
   robots: { index: false, follow: false },
 }
 
@@ -22,7 +22,7 @@ export default async function ConnexionPage() {
   return (
     <AuthShell
       title="Connexion"
-      description="Entrez votre e-mail et votre mot de passe pour accéder à votre espace."
+      description="Entrez votre e-mail et votre mot de passe pour accéder à votre espace déchets électriques et électroniques."
     >
       <LoginForm />
     </AuthShell>

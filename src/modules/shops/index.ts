@@ -9,6 +9,8 @@ export type {
   ShopOperator,
 } from "./contract"
 export { listPartnerShops, listNetworkShops } from "./list-shops"
+export type { PublicDirectory } from "./list-public"
+export { listPublicDirectory } from "./list-public"
 export { countDirectoryShops } from "./count-shops"
 export { createShop } from "./create-shop"
 export { updateShop } from "./update-shop"

@@ -57,8 +57,8 @@ export default async function InvitationPage({
 
   const description =
     preview.role === "CITIZEN"
-      ? `Vous ouvrez votre compte DEEE Kinshasa${preview.email ? ` (${preview.email})` : ""}. Choisissez un mot de passe, puis confirmez-le.`
-      : `Vous rejoignez DEEE Kinshasa en tant que ${roleLabel}${preview.email ? ` (${preview.email})` : ""}. Choisissez un mot de passe, puis confirmez-le.`
+      ? `Vous ouvrez votre compte DEEE Kinshasa pour les déchets électriques et électroniques${preview.email ? ` (${preview.email})` : ""}. Choisissez un mot de passe, puis confirmez-le.`
+      : `Vous rejoignez DEEE Kinshasa, la collecte des déchets électriques et électroniques, en tant que ${roleLabel}${preview.email ? ` (${preview.email})` : ""}. Choisissez un mot de passe, puis confirmez-le.`
 
   const Shell = preview.role === "CITIZEN" ? CitizenAuthShell : AuthShell
 

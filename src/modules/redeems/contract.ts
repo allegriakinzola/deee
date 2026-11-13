@@ -1,5 +1,4 @@
-import type { PartnerKind, RedeemStatus } from "@/generated/prisma/client"
-import type { RedeemReward } from "@/lib/redeem-rewards"
+import type { PartnerKind, RedeemStatus, RewardKind } from "@/generated/prisma/client"
 
 export type DirectoryRedeem = {
   id: string
@@ -21,12 +20,19 @@ export type DirectoryRedeem = {
   createdAt: string
 }
 
+export type ShopRedeemOffer = {
+  id: string
+  label: string
+  usd: number
+}
+
 export type ShopRedeemOffers = {
   shopName: string
   shopCode: string
   partnerName: string
   partnerKind: PartnerKind
-  rewards: RedeemReward[]
+  rewardKind: RewardKind
+  rewards: ShopRedeemOffer[]
 }
 
 export type CitizenRedeemQuote = {

@@ -4,13 +4,13 @@ export function invitationEmail(input: {
   invitationUrl: string
   invitedByName?: string
 }): { subject: string; text: string; html: string } {
-  const subject = "Activez votre compte DEEE Kinshasa"
+  const subject = "Activez votre compte — déchets électriques et électroniques"
   const introText = input.invitedByName
-    ? `${input.invitedByName} vous invite à rejoindre DEEE Kinshasa en tant que ${input.roleLabel}.`
-    : "Vous avez demandé un compte DEEE Kinshasa. Choisissez votre mot de passe pour l’activer."
+    ? `${input.invitedByName} vous invite à rejoindre la collecte des déchets électriques et électroniques à Kinshasa, en tant que ${input.roleLabel}.`
+    : "Vous avez demandé un compte pour déposer vos déchets électriques et électroniques à Kinshasa. Choisissez votre mot de passe pour l’activer."
   const introHtml = input.invitedByName
-    ? `${escapeHtml(input.invitedByName)} vous invite à rejoindre DEEE Kinshasa en tant que <strong>${escapeHtml(input.roleLabel)}</strong>. Choisissez votre mot de passe pour activer l’accès.`
-    : "Vous avez demandé un compte DEEE Kinshasa. Choisissez votre mot de passe pour l’activer."
+    ? `${escapeHtml(input.invitedByName)} vous invite à rejoindre la collecte des déchets électriques et électroniques à Kinshasa, en tant que <strong>${escapeHtml(input.roleLabel)}</strong>. Choisissez votre mot de passe pour activer l’accès.`
+    : "Vous avez demandé un compte pour déposer vos déchets électriques et électroniques à Kinshasa. Choisissez votre mot de passe pour l’activer."
   const text = [
     `Bonjour ${input.displayName},`,
     "",

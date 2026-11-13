@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import type { ReactNode } from "react"
 
+import { LiveRefresh } from "@/components/live/live-refresh"
 import { ShopShell } from "@/components/shop/shop-shell"
 import { canAccessShopSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
@@ -16,5 +17,10 @@ export default async function ShopLayout({
     redirect("/interdit")
   }
 
-  return <ShopShell user={user}>{children}</ShopShell>
+  return (
+    <ShopShell user={user}>
+      <LiveRefresh />
+      {children}
+    </ShopShell>
+  )
 }

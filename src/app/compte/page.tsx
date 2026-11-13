@@ -5,6 +5,7 @@ import { CitizenHome } from "@/components/citizen/citizen-home"
 import { canAccessCitizenSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
 import { getCitizenDashboard } from "@/modules/deposits"
+import { listPublicDirectory } from "@/modules/shops"
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -20,7 +21,16 @@ export default async function CitizenHomePage() {
     redirect("/interdit")
   }
 
-  const data = await getCitizenDashboard(user)
+  const [data, directory] = await Promise.all([
+    getCitizenDashboard(user),
+    listPublicDirectory(),
+  ])
 
-  return <CitizenHome displayName={user.displayName} data={data} />
+  return (
+    <CitizenHome
+      displayName={user.displayName}
+      data={data}
+      nearest={directory.shops[0] ?? null}
+    />
+  )
 }

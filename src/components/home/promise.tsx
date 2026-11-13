@@ -18,7 +18,7 @@ export function PromiseSection() {
           </h2>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             Chaque appareil déposé en shop vous rapporte des points, à échanger
-            contre du crédit, un produit ou une récompense. Kinshasa y gagne un
+            contre un forfait, un goodie ou un service. Kinshasa y gagne un
             recyclage plus propre.
           </p>
         </div>

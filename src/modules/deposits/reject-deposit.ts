@@ -2,6 +2,7 @@ import "server-only"
 
 import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
+import { publishLive, shopChannel, userChannel } from "@/platform/live"
 
 import { assertShopStaff } from "./assert-shop"
 import type { DirectoryDeposit } from "./contract"
@@ -22,5 +23,9 @@ export async function rejectShopDeposit(
     )
   }
   const rejected = await rejectDepositRecord(depositId)
+  publishLive(
+    [userChannel(existing.citizenId), shopChannel(shopId)],
+    { type: "deposit.rejected", at: new Date().toISOString() }
+  )
   return toDirectoryDeposit(rejected)
 }

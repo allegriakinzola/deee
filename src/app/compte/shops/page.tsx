@@ -2,14 +2,16 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { MapPinIcon } from "lucide-react"
 
-import { PARTNERS, SHOPS } from "@/lib/shops"
+import { listPublicDirectory } from "@/modules/shops"
 
 export const metadata: Metadata = {
   title: "Shops",
   robots: { index: false, follow: false },
 }
 
-export default function CitizenShopsPage() {
+export default async function CitizenShopsPage() {
+  const { shops } = await listPublicDirectory()
+
   return (
     <div className="flex flex-col gap-2 pb-2">
       <div className="px-0.5 pb-1">
@@ -17,14 +19,16 @@ export default function CitizenShopsPage() {
           Shops
         </h1>
         <p className="mt-0.5 text-[13px] text-zinc-500 lg:text-sm">
-          Points de dépôt à Kinshasa
+          Points de dépôt des déchets électriques et électroniques à Kinshasa
         </p>
       </div>
-      <ul className="overflow-hidden rounded-2xl bg-white lg:grid lg:grid-cols-2 lg:gap-3 lg:overflow-visible lg:bg-transparent">
-        {SHOPS.map((shop, index) => {
-          const partner = PARTNERS.find((item) => item.id === shop.partnerId)
-
-          return (
+      {shops.length === 0 ? (
+        <p className="rounded-2xl bg-white px-4 py-8 text-sm text-zinc-500">
+          Aucun shop actif pour le moment.
+        </p>
+      ) : (
+        <ul className="overflow-hidden rounded-2xl bg-white lg:grid lg:grid-cols-2 lg:gap-3 lg:overflow-visible lg:bg-transparent">
+          {shops.map((shop, index) => (
             <li
               key={shop.id}
               className="lg:overflow-hidden lg:rounded-2xl lg:bg-white"
@@ -46,7 +50,7 @@ export default function CitizenShopsPage() {
                     {shop.name}
                   </p>
                   <p className="truncate text-[12px] text-zinc-500">
-                    {partner?.shortName} · {shop.area}
+                    {shop.partnerName} · {shop.area}
                   </p>
                 </div>
                 <span className="text-[13px] font-semibold text-emerald-800">
@@ -54,9 +58,9 @@ export default function CitizenShopsPage() {
                 </span>
               </Link>
             </li>
-          )
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

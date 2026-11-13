@@ -6,6 +6,12 @@ export const KIND_LABELS: Record<DirectoryPartner["kind"], string> = {
   PRODUCTS: "Produits",
 }
 
+export const REWARD_LABELS: Record<DirectoryPartner["rewardKind"], string> = {
+  FORFAIT: "Forfait",
+  PRODUIT: "Produit physique",
+  SERVICE: "Service",
+}
+
 export type PartnersViewFilter =
   | "all"
   | "telecom"

@@ -1,7 +1,12 @@
 import "server-only"
 
-import type { PartnerKind, PartnerStatus } from "@/generated/prisma/client"
+import type {
+  PartnerKind,
+  PartnerStatus,
+  RewardKind,
+} from "@/generated/prisma/client"
 
+import { defaultOfferLabels } from "@/lib/reward-offers"
 import { prisma } from "@/platform/db"
 
 export async function countPartners(status?: PartnerStatus) {
@@ -65,15 +70,116 @@ export async function createPartnerRecord(input: {
   shortName: string
   slug: string
   kind: PartnerKind
+  rewardKind: RewardKind
   logo: string | null
 }) {
+  const labels = defaultOfferLabels(input.rewardKind)
   return prisma.partner.create({
     data: {
       name: input.name,
       shortName: input.shortName,
       slug: input.slug,
       kind: input.kind,
+      rewardKind: input.rewardKind,
+      offersReady: true,
       logo: input.logo,
+      offers: {
+        create: labels.map((label, sortOrder) => ({
+          label,
+          kind: input.rewardKind,
+          sortOrder,
+        })),
+      },
+    },
+  })
+}
+
+export async function listPartnerOffers(partnerId: string) {
+  return prisma.partnerOffer.findMany({
+    where: { partnerId, status: "ACTIVE" },
+    orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
+  })
+}
+
+export async function markOffersReady(partnerId: string) {
+  await prisma.partner.update({
+    where: { id: partnerId },
+    data: { offersReady: true },
+  })
+}
+
+export async function nextOfferSortOrder(partnerId: string) {
+  const last = await prisma.partnerOffer.aggregate({
+    where: { partnerId },
+    _max: { sortOrder: true },
+  })
+  return (last._max.sortOrder ?? -1) + 1
+}
+
+export async function createOfferRecord(input: {
+  partnerId: string
+  label: string
+  kind: RewardKind
+  sortOrder: number
+}) {
+  return prisma.partnerOffer.create({ data: input })
+}
+
+export async function findOfferForPartner(partnerId: string, offerId: string) {
+  return prisma.partnerOffer.findFirst({
+    where: { id: offerId, partnerId },
+  })
+}
+
+export async function updateOfferLabel(offerId: string, label: string) {
+  return prisma.partnerOffer.update({
+    where: { id: offerId },
+    data: { label },
+  })
+}
+
+export async function deleteOfferRecord(offerId: string) {
+  await prisma.partnerOffer.delete({ where: { id: offerId } })
+}
+
+export async function listActiveOffers(partnerId: string, rewardKind: RewardKind) {
+  return prisma.partnerOffer.findMany({
+    where: { partnerId, kind: rewardKind, status: "ACTIVE" },
+    orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
+  })
+}
+
+export async function ensureDefaultOffers(
+  partnerId: string,
+  rewardKind: RewardKind
+) {
+  const count = await prisma.partnerOffer.count({ where: { partnerId } })
+  if (count > 0) {
+    return
+  }
+  const labels = defaultOfferLabels(rewardKind)
+  await prisma.partnerOffer.createMany({
+    data: labels.map((label, sortOrder) => ({
+      partnerId,
+      label,
+      kind: rewardKind,
+      sortOrder,
+    })),
+    skipDuplicates: true,
+  })
+}
+
+export async function findActiveOffer(
+  partnerId: string,
+  offerId: string,
+  rewardKind: RewardKind
+) {
+  return prisma.partnerOffer.findFirst({
+    where: {
+      id: offerId,
+      partnerId,
+      kind: rewardKind,
+      status: "ACTIVE",
     },
   })
 }

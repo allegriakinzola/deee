@@ -6,7 +6,7 @@ import { SignupForm } from "@/components/auth/signup-form"
 export const metadata: Metadata = {
   title: "Créer un compte",
   description:
-    "Créez votre compte DEEE Kinshasa : indiquez votre nom et votre e-mail, puis activez-le depuis le lien reçu.",
+    "Créez votre compte DEEE Kinshasa pour déposer vos déchets électriques et électroniques : indiquez votre nom et votre e-mail, puis activez-le depuis le lien reçu.",
   robots: { index: false, follow: false },
 }
 

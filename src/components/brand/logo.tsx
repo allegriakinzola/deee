@@ -44,6 +44,9 @@ export function Logo({ className }: { className?: string }) {
         <span className="text-[15px] font-semibold tracking-tight">
           DEEE Kinshasa
         </span>
+        <span className="text-[10px] text-current/70">
+          Déchets électriques et électroniques
+        </span>
       </span>
     </Link>
   )

@@ -1,8 +1,9 @@
 /**
  * Partners — entreprises partenaires (télécom, banque, produits).
+ * Chaque partenaire a son type de récompense et ses offres d’échange.
  * La GVB les crée ; un administrateur d’entreprise y est rattaché par invitation.
  */
-export type { PartnerKind, PartnerStatus } from "@/generated/prisma/client"
+export type { PartnerKind, PartnerStatus, RewardKind } from "@/generated/prisma/client"
 export type {
   DirectoryPartner,
   DirectoryPartnerAdmin,
@@ -14,6 +15,18 @@ export type { PartnerDashboard } from "./get-partner-dashboard"
 export { getPartnerDashboard } from "./get-partner-dashboard"
 export { listPartnerMembers } from "./list-partner-members"
 export { createPartner } from "./create-partner"
+export type {
+  DirectoryPartnerOffer,
+  PartnerOfferBoard,
+} from "./list-own-offers"
+export { listOwnPartnerOffers } from "./list-own-offers"
+export { createPartnerOffer } from "./create-offer"
+export { updatePartnerOffer } from "./update-offer"
+export { deletePartnerOffer } from "./delete-offer"
+export {
+  findPartnerRedeemOffer,
+  loadPartnerRedeemOffers,
+} from "./load-redeem-offers"
 export { invitePartnerAdmin } from "./invite-partner-admin"
 export { setPartnerStatus } from "./set-partner-status"
 export { setPartnerLogo } from "./set-partner-logo"

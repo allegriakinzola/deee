@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { redirect } from "next/navigation"
 
 import { CitizenShell } from "@/components/citizen/citizen-shell"
+import { LiveRefresh } from "@/components/live/live-refresh"
 import { canAccessCitizenSpace } from "@/modules/access"
 import { getCurrentUser } from "@/modules/auth"
 
@@ -33,5 +34,10 @@ export default async function CitizenLayout({
     redirect("/interdit")
   }
 
-  return <CitizenShell user={user}>{children}</CitizenShell>
+  return (
+    <CitizenShell user={user}>
+      <LiveRefresh />
+      {children}
+    </CitizenShell>
+  )
 }

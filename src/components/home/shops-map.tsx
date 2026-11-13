@@ -10,11 +10,7 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps"
 
-import {
-  KINSHASA_CENTER,
-  partnerName,
-  type Shop,
-} from "@/lib/shops"
+import { KINSHASA_CENTER, type PublicShop } from "@/lib/public-directory"
 import { cn } from "@/lib/utils"
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""
@@ -24,7 +20,7 @@ export function ShopsMap({
   selectedId,
   onSelect,
 }: {
-  shops: Shop[]
+  shops: PublicShop[]
   selectedId: string | null
   onSelect: (id: string | null) => void
 }) {
@@ -74,7 +70,7 @@ export function ShopsMap({
                 {selected.name}
               </p>
               <p className="text-xs text-zinc-500">
-                {partnerName(selected.partnerId)} · {selected.area}
+                {selected.partnerName} · {selected.area}
               </p>
             </div>
           </InfoWindow>
@@ -103,8 +99,8 @@ function MapFocus({
   shops,
   selected,
 }: {
-  shops: Shop[]
-  selected: Shop | null
+  shops: PublicShop[]
+  selected: PublicShop | null
 }) {
   const map = useMap()
 
@@ -133,8 +129,8 @@ function KinshasaEmbed({
   shops,
   selected,
 }: {
-  shops: Shop[]
-  selected: Shop | null
+  shops: PublicShop[]
+  selected: PublicShop | null
 }) {
   const query = selected
     ? `${selected.lat},${selected.lng}`

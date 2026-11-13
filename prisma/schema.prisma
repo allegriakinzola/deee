@@ -33,6 +33,13 @@ enum PartnerKind {
   PRODUCTS
 }
 
+/// Ce que le citoyen reçoit chez ce partenaire. Indépendant du secteur.
+enum RewardKind {
+  FORFAIT
+  PRODUIT
+  SERVICE
+}
+
 enum PartnerStatus {
   ACTIVE
   DISABLED
@@ -144,22 +151,43 @@ model Invitation {
 }
 
 /// Entreprise partenaire (télécom, banque, produits). La GVB la crée.
+/// rewardKind décide des offres proposées dans ses shops.
 model Partner {
-  id        String        @id @default(cuid())
-  name      String
-  shortName String
-  slug      String        @unique
-  kind      PartnerKind
-  logo      String?
-  status    PartnerStatus @default(ACTIVE)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  shortName   String
+  slug        String        @unique
+  kind        PartnerKind
+  rewardKind  RewardKind    @default(PRODUIT)
+  /// Vrai une fois les offres initiales posées. Un retrait ultérieur ne les recrée pas.
+  offersReady Boolean       @default(false)
+  logo        String?
+  status      PartnerStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   memberships PartnerMembership[]
   shops       Shop[]
+  offers      PartnerOffer[]
 
   @@index([kind])
   @@index([status])
+}
+
+/// Offre d’échange propre à un partenaire. Le libellé est figé sur le bon à l’envoi.
+model PartnerOffer {
+  id        String        @id @default(cuid())
+  partnerId String
+  partner   Partner       @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  label     String
+  kind      RewardKind
+  sortOrder Int           @default(0)
+  status    CatalogStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([partnerId, label])
+  @@index([partnerId])
 }
 
 /// Lien User ↔ Partner. Un PARTNER_ADMIN appartient à une entreprise.

@@ -9,17 +9,17 @@ import {
 
 import { PeriodChart } from "@/components/dashboard/period-chart"
 import { formatUsd } from "@/lib/money"
-import { SHOPS } from "@/lib/shops"
+import type { PublicShop } from "@/lib/public-directory"
 import type { CitizenDashboard } from "@/modules/deposits"
-
-const NEAREST = SHOPS.find((shop) => shop.id === "vodacom-gombe") ?? SHOPS[0]
 
 export function CitizenHome({
   displayName,
   data,
+  nearest,
 }: {
   displayName: string
   data: CitizenDashboard
+  nearest: PublicShop | null
 }) {
   const {
     points,
@@ -82,27 +82,33 @@ export function CitizenHome({
           </div>
         </section>
 
-        <Link
-          href={`https://www.google.com/maps?q=${NEAREST.lat},${NEAREST.lng}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-3 rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-5"
-        >
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/50 text-primary-foreground lg:size-12">
-            <MapPinIcon className="size-5 lg:size-6" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium leading-tight text-zinc-900 lg:text-base">
-              Shop le plus proche
-            </p>
-            <p className="truncate text-[12px] text-zinc-500 lg:text-sm">
-              {NEAREST.name} · {NEAREST.area} · ouvert
-            </p>
-          </div>
-          <span className="text-[13px] font-semibold text-emerald-800 lg:text-sm">
-            Y aller
-          </span>
-        </Link>
+        {nearest ? (
+          <Link
+            href={`https://www.google.com/maps?q=${nearest.lat},${nearest.lng}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-5"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/50 text-primary-foreground lg:size-12">
+              <MapPinIcon className="size-5 lg:size-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium leading-tight text-zinc-900 lg:text-base">
+                Un shop ouvert
+              </p>
+              <p className="truncate text-[12px] text-zinc-500 lg:text-sm">
+                {nearest.name} · {nearest.area}
+              </p>
+            </div>
+            <span className="text-[13px] font-semibold text-emerald-800 lg:text-sm">
+              Y aller
+            </span>
+          </Link>
+        ) : (
+          <p className="rounded-2xl bg-white px-3.5 py-3 text-sm text-zinc-500 lg:px-5 lg:py-5">
+            Aucun shop actif pour le moment.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">

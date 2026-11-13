@@ -20,6 +20,7 @@ export async function listDirectoryPartners(
     shortName: partner.shortName,
     slug: partner.slug,
     kind: partner.kind,
+    rewardKind: partner.rewardKind,
     logo: partner.logo,
     status: partner.status,
     createdAt: partner.createdAt.toISOString(),

@@ -1,4 +1,8 @@
-import type { PartnerKind, PartnerStatus } from "@/generated/prisma/client"
+import type {
+  PartnerKind,
+  PartnerStatus,
+  RewardKind,
+} from "@/generated/prisma/client"
 
 import type { UserAccess } from "@/modules/users"
 
@@ -16,6 +20,7 @@ export type DirectoryPartner = {
   shortName: string
   slug: string
   kind: PartnerKind
+  rewardKind: RewardKind
   logo: string | null
   status: PartnerStatus
   createdAt: string
