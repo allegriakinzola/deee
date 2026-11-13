@@ -57,7 +57,7 @@ export function PhonePreview() {
             <div className="h-full w-[72%] rounded-full bg-white" />
           </div>
           <p className="mt-1.5 text-[9px] opacity-80">
-            20 pts avant le prochain forfait data
+            Un bon commence à 250 points
           </p>
         </div>
 
