@@ -99,7 +99,7 @@ Un **échange** suit : le citoyen envoie une demande (`SENT`) avec un nombre de 
 | `deposits` | Demandes de dépôt (brouillon, envoi par code shop, confirmation) |
 | `redeems` | Demandes d’échange (bons, envoi par code shop, confirmation, débit) |
 | `ledger` | Points, écritures, transactions SQL |
-| `collections` | Tournées collecteur (plus tard) |
+| `collections` | Tournées collecteur — pas au menu, pas géré pour l’instant |
 | `notify` | E-mail SMTP (invitations) ; SMS plus tard |
 
 ## Base de données

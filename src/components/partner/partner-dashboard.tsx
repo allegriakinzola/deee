@@ -58,12 +58,14 @@ export function PartnerDashboardView({
         <DashboardStat
           label="Dépôts confirmés"
           value={String(data.confirmedDeposits30)}
-          hint={`${data.pointsCredited30} pts · ${data.pendingDeposits} en attente`}
+          hint={`${data.pointsCredited30} pts · ${data.pendingDeposits} en attente · ${data.rejectedDeposits30} refusés`}
+          href="/partenaire/depots"
         />
         <DashboardStat
           label="Échanges confirmés"
           value={String(data.confirmedRedeems30)}
-          hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)}`}
+          hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)} · ${data.pendingRedeems} en attente`}
+          href="/partenaire/echanges"
         />
       </div>
 

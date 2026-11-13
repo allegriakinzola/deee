@@ -18,6 +18,7 @@ export type DirectoryDeposit = {
   shopName: string | null
   shopCode: string | null
   shopArea: string | null
+  partnerName: string | null
   citizenName: string
   sentAt: string | null
   confirmedAt: string | null

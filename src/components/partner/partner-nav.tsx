@@ -20,18 +20,8 @@ const ITEMS = [
   },
   { href: "/partenaire/shops", label: "Shops", icon: StoreIcon },
   { href: "/partenaire/offres", label: "Offres", icon: GiftIcon },
-  {
-    href: "/partenaire/depots",
-    label: "Dépôts",
-    icon: RecycleIcon,
-    soon: true,
-  },
-  {
-    href: "/partenaire/echanges",
-    label: "Échanges",
-    icon: SparklesIcon,
-    soon: true,
-  },
+  { href: "/partenaire/depots", label: "Dépôts", icon: RecycleIcon },
+  { href: "/partenaire/echanges", label: "Échanges", icon: SparklesIcon },
 ] as const
 
 export function PartnerNav({ variant }: { variant: "side" | "mobile" }) {

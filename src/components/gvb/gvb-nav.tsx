@@ -1,15 +1,14 @@
 "use client"
 
 import {
-  Building2Icon,
   LayoutDashboardIcon,
   RecycleIcon,
   SettingsIcon,
   SparklesIcon,
   StoreIcon,
   TagsIcon,
-  TruckIcon,
   UserCogIcon,
+  Building2Icon,
 } from "lucide-react"
 
 import { SpaceNav } from "@/components/workspace/space-nav"
@@ -20,9 +19,8 @@ const ITEMS = [
   { href: "/admin/partenaires", label: "Partenaires", icon: Building2Icon },
   { href: "/admin/shops", label: "Shops", icon: StoreIcon },
   { href: "/admin/materiels", label: "Matériels", icon: TagsIcon },
-  { href: "/admin/depots", label: "Dépôts", icon: RecycleIcon, soon: true },
-  { href: "/admin/echanges", label: "Échanges", icon: SparklesIcon, soon: true },
-  { href: "/admin/collectes", label: "Collectes", icon: TruckIcon, soon: true },
+  { href: "/admin/depots", label: "Dépôts", icon: RecycleIcon },
+  { href: "/admin/echanges", label: "Échanges", icon: SparklesIcon },
   { href: "/admin/parametres", label: "Paramètres", icon: SettingsIcon },
 ] as const
 

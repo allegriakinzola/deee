@@ -65,6 +65,19 @@ export async function listShopRedeems(shopId: string, statuses: RedeemStatus[]) 
   })
 }
 
+export async function listScopedRedeems(
+  scope: RedeemScope,
+  statuses: RedeemStatus[],
+  take: number
+) {
+  return prisma.redeem.findMany({
+    where: redeemWhere(scope, statuses),
+    include: redeemInclude,
+    orderBy: { createdAt: "desc" },
+    take,
+  })
+}
+
 export async function countRedeems(
   scope: RedeemScope,
   statuses: RedeemStatus[]

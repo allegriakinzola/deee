@@ -13,6 +13,7 @@ export type DirectoryRedeem = {
   shopName: string
   shopCode: string
   shopArea: string
+  partnerName: string | null
   citizenName: string
   sentAt: string
   confirmedAt: string | null

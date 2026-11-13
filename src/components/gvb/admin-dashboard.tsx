@@ -63,20 +63,26 @@ export function AdminDashboardView({
         <DashboardStat
           label="Dépôts en attente"
           value={String(data.pendingDeposits)}
+          hint="À confirmer au shop"
+          href="/admin/depots"
         />
         <DashboardStat
           label="Échanges en attente"
           value={String(data.pendingRedeems)}
+          hint="À remettre au shop"
+          href="/admin/echanges"
         />
         <DashboardStat
           label="Dépôts confirmés"
           value={String(data.confirmedDeposits30)}
-          hint={`${data.pointsCredited30} pts crédités`}
+          hint={`${data.pointsCredited30} pts · ${data.rejectedDeposits30} refusés`}
+          href="/admin/depots"
         />
         <DashboardStat
           label="Échanges confirmés"
           value={String(data.confirmedRedeems30)}
-          hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)}`}
+          hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)} · ${data.rejectedRedeems30} refusés`}
+          href="/admin/echanges"
         />
       </div>
 

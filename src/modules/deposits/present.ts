@@ -25,6 +25,7 @@ type DepositRow = {
     name: string
     code: string
     area: string
+    partner?: { name: string } | null
   } | null
   lines: LineRow[]
 }
@@ -51,6 +52,7 @@ export function toDirectoryDeposit(row: DepositRow): DirectoryDeposit {
     shopName: row.shop?.name ?? null,
     shopCode: row.shop?.code ?? null,
     shopArea: row.shop?.area ?? null,
+    partnerName: row.shop?.partner?.name ?? null,
     citizenName: row.citizen.displayName,
     sentAt: row.sentAt?.toISOString() ?? null,
     confirmedAt: row.confirmedAt?.toISOString() ?? null,

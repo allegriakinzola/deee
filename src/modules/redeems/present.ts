@@ -19,6 +19,7 @@ type RedeemRow = {
     name: string
     code: string
     area: string
+    partner?: { name: string } | null
   }
 }
 
@@ -36,6 +37,7 @@ export function toDirectoryRedeem(row: RedeemRow): DirectoryRedeem {
     shopName: row.shop.name,
     shopCode: row.shop.code,
     shopArea: row.shop.area,
+    partnerName: row.shop.partner?.name ?? null,
     citizenName: row.citizen.displayName,
     sentAt: row.sentAt.toISOString(),
     confirmedAt: row.confirmedAt?.toISOString() ?? null,

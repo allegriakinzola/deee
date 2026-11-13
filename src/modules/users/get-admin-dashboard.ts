@@ -24,8 +24,10 @@ export type AdminDashboard = {
   pendingDeposits: number
   pendingRedeems: number
   confirmedDeposits30: number
+  rejectedDeposits30: number
   pointsCredited30: number
   confirmedRedeems30: number
+  rejectedRedeems30: number
   bons30: number
   usd30: string
   daily: Array<{
@@ -107,8 +109,10 @@ export async function getAdminDashboard(
     pendingDeposits: deposits.pending,
     pendingRedeems: redeems.pending,
     confirmedDeposits30: deposits.confirmed30,
+    rejectedDeposits30: deposits.rejected30,
     pointsCredited30: deposits.pointsCredited30,
     confirmedRedeems30: redeems.confirmed30,
+    rejectedRedeems30: redeems.rejected30,
     bons30: redeems.bons30,
     usd30: redeems.usd30.toFixed(2),
     daily: mergeDailySeries(deposits.daily, redeems.daily),

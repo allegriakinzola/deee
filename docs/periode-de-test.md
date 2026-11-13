@@ -19,6 +19,6 @@ Deux semaines, avant le lancement, sur le site de démonstration.
 
 ## Données fictives
 
-`DEMO_SEED=1 npm run db:demo` ajoute, si elles manquent, un shop de démonstration par partenaire sans shop, un citoyen `demo.citoyen@deee.local`, un dépôt confirmé et un échange confirmé. Le mot de passe du citoyen est celui de `DEMO_CITIZEN_PASSWORD`, ou un mot de passe affiché une fois dans le terminal.
+`DEMO_SEED=1 npm run db:demo` retire tous les comptes sauf l’administrateur GVB, puis remet les utilisateurs de démonstration (citoyen, collecteur, un administrateur par partenaire, un responsable par shop), un dépôt confirmé et un échange confirmé. Le mot de passe du citoyen est `Citoyen-Kinshasa-2026`.
 
 Ne lancez cette commande sur la base de production que si cette base sert encore à la démonstration.

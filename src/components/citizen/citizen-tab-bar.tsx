@@ -27,12 +27,7 @@ const SIDE = [
   { href: "/compte/profil", label: "Compte", icon: UserIcon },
   { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
   { href: "/compte/echange", label: "Échanger", icon: SparklesIcon },
-  {
-    href: "/compte/catalogue",
-    label: "Catalogue",
-    icon: SmartphoneIcon,
-    soon: true,
-  },
+  { href: "/compte/catalogue", label: "Catalogue", icon: SmartphoneIcon },
 ] as const
 
 function isActive(

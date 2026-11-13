@@ -76,6 +76,19 @@ export async function listShopDeposits(shopId: string, statuses: DepositStatus[]
   })
 }
 
+export async function listScopedDeposits(
+  scope: DepositScope,
+  statuses: DepositStatus[],
+  take: number
+) {
+  return prisma.deposit.findMany({
+    where: depositWhere(scope, statuses),
+    include: depositInclude,
+    orderBy: { createdAt: "desc" },
+    take,
+  })
+}
+
 export async function countDeposits(
   scope: DepositScope,
   statuses: DepositStatus[]

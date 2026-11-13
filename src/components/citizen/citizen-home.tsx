@@ -52,7 +52,7 @@ export function CitizenHome({
       <div className="grid grid-cols-4 gap-2 lg:gap-4">
         <QuickAction href="/compte/depot" icon={RecycleIcon} label="Déposer" />
         <QuickAction href="/compte/shops" icon={MapPinIcon} label="Shops" />
-        <QuickAction icon={SmartphoneIcon} label="Catalogue" soon />
+        <QuickAction href="/compte/catalogue" icon={SmartphoneIcon} label="Catalogue" />
         <QuickAction href="/compte/echange" icon={SparklesIcon} label="Échanger" />
       </div>
 
@@ -126,11 +126,13 @@ export function CitizenHome({
           label="Dépôts (30 j)"
           value={String(data.confirmedDeposits30)}
           hint={`${data.pointsCredited30} pts`}
+          href="/compte/depot"
         />
         <MiniStat
           label="Échanges (30 j)"
           value={String(data.confirmedRedeems30)}
           hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)}`}
+          href="/compte/echange"
         />
       </div>
 
