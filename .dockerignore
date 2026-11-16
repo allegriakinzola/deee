@@ -1,0 +1,12 @@
+# Build context. Le .env n’entre pas dans l’image.
+node_modules
+.next
+.git
+.env
+.env.*
+public/uploads
+docs
+*.md
+coverage
+.vercel
+*.tsbuildinfo

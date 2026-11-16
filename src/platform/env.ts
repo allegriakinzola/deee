@@ -17,11 +17,6 @@ export function getDatabaseUrl(): string {
   return withExplicitSsl(required("DATABASE_URL"))
 }
 
-export function getDirectUrl(): string {
-  const direct = process.env.DIRECT_URL?.trim()
-  return withExplicitSsl(direct || getDatabaseUrl())
-}
-
 function withExplicitSsl(url: string): string {
   return url.replace(
     /([?&])sslmode=(require|prefer|verify-ca)\b/i,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 
+import { LogoutButton } from "@/components/gvb/logout-button"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -26,12 +27,7 @@ export default function InterditPage() {
         <Link href="/" className={cn(buttonVariants({ size: "lg" }))}>
           Retour à l’accueil
         </Link>
-        <Link
-          href="/connexion"
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-        >
-          Connexion
-        </Link>
+        <LogoutButton size="lg" />
       </div>
     </main>
   )

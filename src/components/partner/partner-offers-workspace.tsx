@@ -4,7 +4,12 @@ import { useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
 
-import { deleteJson, patchJson, postJson } from "@/lib/api"
+import { deleteJson, patchForm, postForm } from "@/lib/api"
+import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
+import { OfferPhotoField } from "@/components/partner/offer-photo-field"
 import {
   rewardKindExamples,
   rewardKindLabel,
@@ -32,6 +37,8 @@ import type { PartnerOfferBoard } from "@/modules/partners"
 export function PartnerOffersWorkspace({ board }: { board: PartnerOfferBoard }) {
   const router = useRouter()
   const [label, setLabel] = useState("")
+  const [image, setImage] = useState<File | null>(null)
+  const [photoKey, setPhotoKey] = useState(0)
   const [error, setError] = useState("")
   const [pending, setPending] = useState(false)
   const [editTarget, setEditTarget] = useState<PartnerOfferBoard["offers"][number] | null>(
@@ -40,23 +47,29 @@ export function PartnerOffersWorkspace({ board }: { board: PartnerOfferBoard }) 
   const [deleteTarget, setDeleteTarget] = useState<
     PartnerOfferBoard["offers"][number] | null
   >(null)
+  const paged = usePagedRows(board.offers, String(board.offers.length))
 
   async function createOffer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
     setPending(true)
-    const result = await postJson("/api/v1/partners/offers", { label })
+    const body = new FormData()
+    body.append("label", label)
+    if (image) body.append("image", image)
+    const result = await postForm("/api/v1/partners/offers", body)
     setPending(false)
     if (!result.ok) {
       setError(result.message)
       return
     }
     setLabel("")
+    setImage(null)
+    setPhotoKey((current) => current + 1)
     router.refresh()
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-3xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div>
         <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
           Récompenses
@@ -70,19 +83,23 @@ export function PartnerOffersWorkspace({ board }: { board: PartnerOfferBoard }) 
 
       <form
         onSubmit={(event) => void createOffer(event)}
-        className="flex flex-col gap-3 rounded-2xl bg-card p-4 ring-1 ring-foreground/10 sm:flex-row sm:items-end"
+        className="space-y-4 rounded-2xl bg-card p-4 ring-1 ring-foreground/10"
       >
-        <div className="min-w-0 flex-1">
-          <Field label="Nouvelle offre" htmlFor="offer-label">
-            <Input
-              id="offer-label"
-              value={label}
-              onChange={(event) => setLabel(event.target.value)}
-              placeholder={placeholderFor(board.rewardKind)}
-              required
-            />
-          </Field>
-        </div>
+        <Field label="Nouvelle offre" htmlFor="offer-label">
+          <Input
+            id="offer-label"
+            value={label}
+            onChange={(event) => setLabel(event.target.value)}
+            placeholder={placeholderFor(board.rewardKind)}
+            required
+          />
+        </Field>
+        <OfferPhotoField
+          key={photoKey}
+          id="offer-image"
+          file={image}
+          onChange={setImage}
+        />
         <Button type="submit" disabled={pending} className="h-12 rounded-2xl">
           <PlusIcon className="size-4" />
           {pending ? "Ajout…" : "Ajouter"}
@@ -97,12 +114,24 @@ export function PartnerOffersWorkspace({ board }: { board: PartnerOfferBoard }) 
           </p>
         ) : (
           <ul>
-            {board.offers.map((offer) => (
+            {paged.rows.map((offer) => (
               <li
                 key={offer.id}
                 className="flex items-center justify-between gap-3 border-t border-border/70 px-4 py-3 first:border-t-0"
               >
-                <p className="font-medium">{offer.label}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  {offer.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={offer.image}
+                      alt=""
+                      className="size-12 shrink-0 rounded-xl bg-white object-cover ring-1 ring-foreground/10"
+                    />
+                  ) : (
+                    <span className="size-12 shrink-0 rounded-xl bg-muted" />
+                  )}
+                  <p className="truncate font-medium">{offer.label}</p>
+                </div>
                 <div className="flex shrink-0 gap-1">
                   <Button
                     type="button"
@@ -127,6 +156,17 @@ export function PartnerOffersWorkspace({ board }: { board: PartnerOfferBoard }) 
             ))}
           </ul>
         )}
+        {board.offers.length > 0 ? (
+          <DirectoryPagination
+            page={paged.page}
+            pageCount={paged.pageCount}
+            total={paged.total}
+            from={paged.from}
+            to={paged.to}
+            emptyLabel="0 offre"
+            onPage={paged.setPage}
+          />
+        ) : null}
       </section>
 
       <EditOfferSheet
@@ -166,28 +206,6 @@ function EditOfferSheet({
   offer: PartnerOfferBoard["offers"][number] | null
   onClose: () => void
 }) {
-  const router = useRouter()
-  const [error, setError] = useState("")
-  const [pending, setPending] = useState(false)
-
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!offer) return
-    const nextLabel = String(new FormData(event.currentTarget).get("label") ?? "")
-    setError("")
-    setPending(true)
-    const result = await patchJson(`/api/v1/partners/offers/${offer.id}`, {
-      label: nextLabel,
-    })
-    setPending(false)
-    if (!result.ok) {
-      setError(result.message)
-      return
-    }
-    router.refresh()
-    onClose()
-  }
-
   return (
     <Sheet
       open={offer !== null}
@@ -199,31 +217,80 @@ function EditOfferSheet({
         <SheetHeader className="border-b border-border/80">
           <SheetTitle>Modifier l’offre</SheetTitle>
           <SheetDescription>
-            Le nouveau libellé remplace l’ancien pour les prochains échanges.
+            Le libellé et la photo valent pour les prochains échanges.
           </SheetDescription>
         </SheetHeader>
         {offer ? (
-          <form
-            key={offer.id}
-            onSubmit={(event) => void onSubmit(event)}
-            className="flex flex-1 flex-col gap-4 px-4 pb-4"
-          >
-            <Field label="Libellé" htmlFor="edit-offer-label">
-              <Input
-                id="edit-offer-label"
-                name="label"
-                defaultValue={offer.label}
-                required
-              />
-            </Field>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            <Button type="submit" disabled={pending} className="h-11 rounded-2xl">
-              {pending ? "Enregistrement…" : "Enregistrer"}
-            </Button>
-          </form>
+          <EditOfferForm key={offer.id} offer={offer} onClose={onClose} />
         ) : null}
       </SheetContent>
     </Sheet>
+  )
+}
+
+function EditOfferForm({
+  offer,
+  onClose,
+}: {
+  offer: PartnerOfferBoard["offers"][number]
+  onClose: () => void
+}) {
+  const router = useRouter()
+  const [label, setLabel] = useState(offer.label)
+  const [image, setImage] = useState<File | null>(null)
+  const [cleared, setCleared] = useState(false)
+  const [error, setError] = useState("")
+  const [pending, setPending] = useState(false)
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError("")
+    setPending(true)
+    const body = new FormData()
+    body.append("label", label)
+    if (image) body.append("image", image)
+    if (cleared && !image) body.append("removeImage", "1")
+    const result = await patchForm(`/api/v1/partners/offers/${offer.id}`, body)
+    setPending(false)
+    if (!result.ok) {
+      setError(result.message)
+      return
+    }
+    router.refresh()
+    onClose()
+  }
+
+  return (
+    <form
+      onSubmit={(event) => void onSubmit(event)}
+      className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4"
+    >
+      <Field label="Libellé" htmlFor="edit-offer-label">
+        <Input
+          id="edit-offer-label"
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          required
+        />
+      </Field>
+      <OfferPhotoField
+        id="edit-offer-image"
+        file={image}
+        currentSrc={cleared ? null : offer.image}
+        onChange={(file) => {
+          setImage(file)
+          if (file) setCleared(false)
+        }}
+        onClear={() => {
+          setImage(null)
+          setCleared(true)
+        }}
+      />
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      <Button type="submit" disabled={pending} className="h-11 rounded-2xl">
+        {pending ? "Enregistrement…" : "Enregistrer"}
+      </Button>
+    </form>
   )
 }
 

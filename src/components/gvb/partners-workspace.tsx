@@ -17,6 +17,10 @@ import {
 import { deleteJson, patchJson } from "@/lib/api"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
 import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
+import {
   CreatePartnerForm,
   type PartnerCreated,
 } from "@/components/gvb/create-partner-form"
@@ -90,6 +94,7 @@ export function PartnersWorkspace({
     () => filterDirectoryPartners(partners, filter, query),
     [partners, filter, query]
   )
+  const paged = usePagedRows(visible, `${filter}|${query}`)
 
   function selectFilter(next: PartnersViewFilter) {
     setFilter((current) => (current === next && next !== "all" ? "all" : next))
@@ -139,7 +144,7 @@ export function PartnersWorkspace({
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
@@ -264,7 +269,7 @@ export function PartnersWorkspace({
                   </td>
                 </tr>
               ) : (
-                visible.map((partner) => {
+                paged.rows.map((partner) => {
                   const busy = pendingId === partner.id
                   return (
                     <tr
@@ -333,6 +338,15 @@ export function PartnersWorkspace({
             </tbody>
           </table>
         </DirectoryTableScroll>
+        <DirectoryPagination
+          page={paged.page}
+          pageCount={paged.pageCount}
+          total={paged.total}
+          from={paged.from}
+          to={paged.to}
+          emptyLabel="0 partenaire"
+          onPage={paged.setPage}
+        />
       </section>
 
       <Sheet
@@ -346,7 +360,7 @@ export function PartnersWorkspace({
       >
         <SheetContent
           side="right"
-          className="w-full sm:max-w-md"
+          className="w-full sm:max-w-lg"
           showCloseButton
         >
           <SheetHeader className="border-b border-border/80">
@@ -360,7 +374,7 @@ export function PartnersWorkspace({
                     ? "Un e-mail d’activation a été envoyé à l’administrateur. Vous pouvez aussi copier le lien."
                     : "L’e-mail n’a pas pu partir. Copiez le lien et transmettez-le à l’administrateur."
                   : "L’entreprise est enregistrée. Invitez un administrateur quand vous serez prêt."
-                : "Choisissez le secteur et la récompense de ses shops. L’administrateur est facultatif."}
+                : "Le nom de l’entreprise, puis ce que ses shops remettent aux citoyens."}
             </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">

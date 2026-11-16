@@ -1,0 +1,11 @@
+# Fichier à placer dans /opt/deee sur le VPS, à côté de /opt/deee/.env.
+# Postgres est sur la machine : DATABASE_URL utilise 127.0.0.1.
+
+services:
+  web:
+    image: allegriakinzola/deee:latest
+    restart: unless-stopped
+    network_mode: host
+    env_file: /opt/deee/.env
+    environment:
+      PORT: "3050"

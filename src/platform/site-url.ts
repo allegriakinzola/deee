@@ -1,13 +1,17 @@
-/** Origine publique — `NEXT_PUBLIC_SITE_URL`, sinon l’URL Vercel. Jamais de localhost en dur. */
+function envValue(name: string): string {
+  const value = process.env[name]
+  return typeof value === "string" ? value.trim().replace(/\/$/, "") : ""
+}
+
+/** Origine publique. Lue au démarrage, pas figée dans l’image. */
 export function getSiteUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "")
+  const configured = envValue("NEXT_PUBLIC_SITE_URL")
   if (configured) {
     return configured
   }
 
   const vercel =
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
-    process.env.VERCEL_URL?.trim()
+    envValue("VERCEL_PROJECT_PRODUCTION_URL") || envValue("VERCEL_URL")
   if (vercel) {
     const host = vercel.replace(/^https?:\/\//, "")
     return `https://${host}`

@@ -4,6 +4,10 @@ import { useMemo, useState } from "react"
 import { SearchIcon, StoreIcon } from "lucide-react"
 
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
+import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
 import { PartnerMark } from "@/components/brand/partner-mark"
 import {
   filterShops,
@@ -24,13 +28,14 @@ export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
     () => filterShops(shops, filter, query),
     [shops, filter, query]
   )
+  const paged = usePagedRows(visible, `${filter}|${query}`)
 
   function selectFilter(next: ShopsViewFilter) {
     setFilter((current) => (current === next && next !== "all" ? "all" : next))
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div>
         <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
           Réseau
@@ -114,7 +119,7 @@ export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
                   </td>
                 </tr>
               ) : (
-                visible.map((shop) => (
+                paged.rows.map((shop) => (
                   <tr
                     key={shop.id}
                     className="border-t border-border/60 hover:bg-muted/30"
@@ -152,6 +157,15 @@ export function NetworkShopsDirectory({ shops }: { shops: DirectoryShop[] }) {
             </tbody>
           </table>
         </DirectoryTableScroll>
+        <DirectoryPagination
+          page={paged.page}
+          pageCount={paged.pageCount}
+          total={paged.total}
+          from={paged.from}
+          to={paged.to}
+          emptyLabel="0 shop"
+          onPage={paged.setPage}
+        />
       </section>
     </div>
   )

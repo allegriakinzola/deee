@@ -3,6 +3,8 @@ import "server-only"
 import type { AuthUser } from "@/modules/auth"
 import { AppError, ErrorCode } from "@/platform/errors"
 
+import { removePublicUpload } from "@/platform/uploads"
+
 import { assertCanManageOwnOffers } from "./assert-own-offers"
 import { deleteOfferRecord, findOfferForPartner } from "./repository"
 

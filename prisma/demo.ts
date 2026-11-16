@@ -3,6 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../src/generated/prisma/client"
 import { hashPassword } from "../src/platform/password"
 
+import { seedClients } from "./clients"
+
 config({ path: ".env", override: true })
 config({ path: ".env.local", override: true })
 
@@ -56,7 +58,7 @@ async function main() {
   if (process.env.DEMO_SEED !== "1") {
     throw new Error("Refusé. Relancez avec DEMO_SEED=1.")
   }
-  const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL
+  const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) throw new Error("DATABASE_URL est manquant.")
 
   const citizenPassword = "Citoyen-Kinshasa-2026"
@@ -65,15 +67,11 @@ async function main() {
   })
 
   try {
-    const adminEmail = (process.env.GVB_ADMIN_EMAIL || "gvb.admin@deee.local")
-      .trim()
-      .toLowerCase()
-    const adminIdentity = await prisma.identity.findUnique({
-      where: { type_value: { type: "EMAIL", value: adminEmail } },
-      include: { user: true },
+    const admin = await prisma.user.findFirst({
+      where: { role: "GVB_ADMIN", status: "ACTIVE" },
     })
-    if (!adminIdentity || adminIdentity.user.role !== "GVB_ADMIN") {
-      throw new Error(`Administrateur GVB introuvable : ${adminEmail}`)
+    if (!admin) {
+      throw new Error("Administrateur GVB introuvable.")
     }
 
     const partners = await prisma.partner.findMany({
@@ -188,7 +186,7 @@ async function main() {
     const removed = await prisma.$transaction(
       async (tx) => {
         const others = await tx.user.findMany({
-          where: { id: { not: adminIdentity.userId } },
+          where: { id: { not: admin.id } },
           select: { id: true },
         })
         const otherIds = others.map((user) => user.id)
@@ -333,6 +331,8 @@ async function main() {
       })
       console.log(`Échange démo confirmé : ${offer.label}`)
     }
+
+    await seedClients(prisma)
 
     console.log(`Comptes retirés : ${removed}`)
     console.log(`Comptes démo : ${accounts.length}`)

@@ -1,4 +1,14 @@
+"use client"
+
+import { useMemo, useState } from "react"
+import Link from "next/link"
+import { SearchIcon } from "lucide-react"
+
+import { CitizenPageHeader, CitizenSection } from "@/components/citizen/citizen-page"
+import { buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { formatUsd } from "@/lib/money"
+import { cn } from "@/lib/utils"
 import type { DirectoryMaterial } from "@/modules/materials"
 
 export function CitizenCatalog({
@@ -10,59 +20,121 @@ export function CitizenCatalog({
   pointsPerBon: number
   bonUsd: string
 }) {
-  const groups = new Map<string, DirectoryMaterial[]>()
-  for (const material of materials) {
-    const list = groups.get(material.category) ?? []
-    list.push(material)
-    groups.set(material.category, list)
-  }
+  const [query, setQuery] = useState("")
+  const [category, setCategory] = useState("Tous")
+
+  const categories = useMemo(() => {
+    const names = [...new Set(materials.map((item) => item.category))]
+    return ["Tous", ...names]
+  }, [materials])
+
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    return materials.filter((item) => {
+      if (category !== "Tous" && item.category !== category) {
+        return false
+      }
+      if (!needle) {
+        return true
+      }
+      return `${item.name} ${item.category}`.toLowerCase().includes(needle)
+    })
+  }, [category, materials, query])
+
+  const groups = useMemo(() => {
+    const map = new Map<string, DirectoryMaterial[]>()
+    for (const material of visible) {
+      const list = map.get(material.category) ?? []
+      list.push(material)
+      map.set(material.category, list)
+    }
+    return [...map.entries()]
+  }, [visible])
 
   return (
-    <div className="flex flex-col gap-3 pb-2 lg:gap-6">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight text-zinc-900 lg:text-2xl">
-          Catalogue
-        </h1>
-        <p className="mt-1 max-w-2xl text-[13px] text-zinc-500 lg:text-sm">
-          Chaque appareil accepté a un nombre de points fixe.{" "}
-          {pointsPerBon > 0
-            ? `1 bon = ${pointsPerBon} points (${formatUsd(bonUsd)}).`
-            : "La valeur d’un bon se règle côté GVB."}{" "}
-          Préparez le dépôt, puis apportez l’appareil en shop.
-        </p>
+    <div className="flex flex-col gap-8 pb-2 lg:gap-10">
+      <CitizenPageHeader
+        title="Catalogue"
+        description={
+          pointsPerBon > 0
+            ? `Chaque appareil a un nombre de points fixe. 1 bon = ${pointsPerBon} points (${formatUsd(bonUsd)}). Pour déposer, passez par Déposer.`
+            : "Chaque appareil a un nombre de points fixe. Pour déposer, passez par Déposer."
+        }
+        action={
+          <Link
+            href="/compte/depot"
+            className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
+          >
+            Préparer un dépôt
+          </Link>
+        }
+      />
+
+      <div className="flex flex-col gap-3">
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Rechercher un appareil"
+            aria-label="Rechercher un appareil"
+            className="h-11 bg-white pl-9"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => setCategory(name)}
+              className={
+                category === name
+                  ? "shrink-0 rounded-full bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white"
+                  : "shrink-0 rounded-full bg-white px-3 py-1.5 text-sm font-medium text-zinc-600 ring-1 ring-zinc-200"
+              }
+            >
+              {name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {materials.length === 0 ? (
-        <p className="rounded-2xl bg-white px-4 py-8 text-sm text-zinc-500">
+        <p className="rounded-2xl bg-white px-4 py-8 text-sm text-zinc-500 ring-1 ring-zinc-200/80">
           Aucun matériel n’est ouvert au dépôt pour le moment.
         </p>
+      ) : visible.length === 0 ? (
+        <p className="rounded-2xl bg-white px-4 py-8 text-sm text-zinc-500 ring-1 ring-zinc-200/80">
+          Aucun appareil ne correspond à cette recherche.
+        </p>
       ) : (
-        [...groups.entries()].map(([category, items]) => (
-          <section key={category} className="rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-5">
-            <h2 className="text-sm font-semibold text-zinc-900 lg:text-base">
-              {category}
-            </h2>
-            <ul className="mt-2">
+        groups.map(([group, items]) => (
+          <CitizenSection key={group} eyebrow="Catégorie" title={group}>
+            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-center justify-between gap-3 border-t border-zinc-100 py-2.5 first:border-t-0"
+                  className="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-zinc-200/80"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.image}
+                    alt=""
+                    className="size-16 shrink-0 rounded-xl object-cover sm:size-20"
+                  />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-900">
-                      {item.name}
+                    <p className="font-medium text-zinc-900">{item.name}</p>
+                    <p className="mt-1 text-sm text-zinc-500">
+                      {`${formatUsd(item.usdEquivalent)} / ${item.unit}`}
                     </p>
-                    <p className="text-[12px] text-zinc-500 lg:text-sm">
-                      {formatUsd(item.usdEquivalent)} / {item.unit}
+                    <p className="mt-2 text-sm font-semibold text-emerald-800">
+                      {`${item.points} pts`}
                     </p>
                   </div>
-                  <p className="shrink-0 text-sm font-semibold text-zinc-900">
-                    {item.points} pts
-                  </p>
                 </li>
               ))}
             </ul>
-          </section>
+          </CitizenSection>
         ))
       )}
     </div>

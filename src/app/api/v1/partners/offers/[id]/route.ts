@@ -1,6 +1,6 @@
 import { requireActor } from "@/modules/auth"
 import { deletePartnerOffer, updatePartnerOffer } from "@/modules/partners"
-import { jsonData, jsonError, readJsonBody } from "@/platform/http"
+import { formFileBytes, formString, jsonData, jsonError } from "@/platform/http"
 
 export async function PATCH(
   request: Request,
@@ -9,7 +9,14 @@ export async function PATCH(
   try {
     const actor = await requireActor()
     const { id } = await context.params
-    const result = await updatePartnerOffer(actor, id, await readJsonBody(request))
+    const form = await request.formData()
+    const result = await updatePartnerOffer(
+      actor,
+      id,
+      { label: formString(form, "label") },
+      await formFileBytes(form, "image"),
+      formString(form, "removeImage") === "1"
+    )
     return jsonData(result)
   } catch (error) {
     return jsonError(error)

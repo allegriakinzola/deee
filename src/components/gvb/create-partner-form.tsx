@@ -7,6 +7,7 @@ import { postForm } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Field, Input } from "@/components/ui/input"
 import { PartnerLogoField } from "@/components/gvb/partner-logo-field"
+import { cn } from "@/lib/utils"
 import {
   REWARD_KINDS,
   defaultOfferLabels,
@@ -18,10 +19,22 @@ import {
 } from "@/lib/reward-offers"
 import type { PartnerInvitationResult } from "@/modules/partners"
 
-const KINDS = [
-  { value: "TELECOM", label: "Télécom" },
-  { value: "BANK", label: "Banque" },
-  { value: "PRODUCTS", label: "Produits" },
+const SECTORS = [
+  {
+    value: "TELECOM",
+    label: "Télécom",
+    detail: "Opérateur mobile",
+  },
+  {
+    value: "BANK",
+    label: "Banque",
+    detail: "Banque ou microfinance",
+  },
+  {
+    value: "PRODUCTS",
+    label: "Produits",
+    detail: "Biens et goodies",
+  },
 ] as const
 
 export type PartnerCreated = {
@@ -82,114 +95,133 @@ export function CreatePartnerForm({
     onCreated(result.data)
   }
 
+  function chooseSector(next: PartnerSector) {
+    setKind(next)
+    setRewardKind(defaultRewardKind(next))
+  }
+
+  const offers = defaultOfferLabels(rewardKind)
+
   return (
-    <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-4">
-      <Field label="Nom" htmlFor="partner-name">
-        <Input
-          id="partner-name"
-          name="name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Vodacom"
-          required
+    <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-6">
+      <section className="space-y-3">
+        <FormIntro
+          title="L’entreprise"
+          description="Le nom officiel, puis le nom court affiché sur les cartes."
         />
-      </Field>
-      <Field
-        label="Nom court"
-        htmlFor="partner-short"
-        hint="Affiché sur les boutons et les cartes."
-      >
-        <Input
-          id="partner-short"
-          name="shortName"
-          value={shortName}
-          onChange={(event) => setShortName(event.target.value)}
-          placeholder="Vodacom"
-          required
+        <Field
+          label="Nom"
+          htmlFor="partner-name"
+          hint="Exemple : Vodacom RDC."
+        >
+          <Input
+            id="partner-name"
+            name="name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Vodacom RDC"
+            required
+          />
+        </Field>
+        <Field
+          label="Nom court"
+          htmlFor="partner-short"
+          hint="Exemple : Vodacom. C’est ce nom qui apparaît sur les boutons."
+        >
+          <Input
+            id="partner-short"
+            name="shortName"
+            value={shortName}
+            onChange={(event) => setShortName(event.target.value)}
+            placeholder="Vodacom"
+            required
+          />
+        </Field>
+        <PartnerLogoField
+          id="partner-logo"
+          file={logo}
+          hint="JPEG, PNG ou WebP · 2 Mo maximum."
+          onChange={setLogo}
         />
-      </Field>
-      <Field
-        label="Secteur"
-        htmlFor="partner-kind"
-        hint="Télécom, banque ou produits."
-      >
-        <select
-          id="partner-kind"
-          name="kind"
-          value={kind}
-          onChange={(event) => {
-            const next = event.target.value as PartnerSector
-            setKind(next)
-            setRewardKind(defaultRewardKind(next))
-          }}
-          className="h-12 w-full rounded-2xl border border-transparent bg-muted/70 px-4 text-sm outline-none hover:bg-muted focus-visible:border-ring focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          {KINDS.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field
-        label="Récompense"
-        htmlFor="partner-reward"
-        hint={`Offres : ${defaultOfferLabels(rewardKind).join(", ")}.`}
-      >
-        <select
-          id="partner-reward"
-          name="rewardKind"
-          value={rewardKind}
-          onChange={(event) =>
-            setRewardKind(event.target.value as RewardKind)
-          }
-          className="h-12 w-full rounded-2xl border border-transparent bg-muted/70 px-4 text-sm outline-none hover:bg-muted focus-visible:border-ring focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          {REWARD_KINDS.map((item) => (
-            <option key={item} value={item}>
-              {rewardKindLabel(item)} — {rewardKindExamples(item)}
-            </option>
-          ))}
-        </select>
-      </Field>
+      </section>
 
-      <PartnerLogoField
-        id="partner-logo"
-        file={logo}
-        hint="JPEG, PNG ou WebP · 2 Mo maximum. Facultatif."
-        onChange={setLogo}
-      />
-
-      <div className="rounded-2xl bg-muted/40 p-4">
-        <p className="text-sm font-medium">Administrateur (facultatif)</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          La personne définira son mot de passe via le lien d’invitation. Vous
-          pourrez aussi l’inviter plus tard.
-        </p>
-        <div className="mt-3 space-y-3">
-          <Field label="Nom" htmlFor="partner-admin-name">
-            <Input
-              id="partner-admin-name"
-              name="adminDisplayName"
-              value={adminName}
-              onChange={(event) => setAdminName(event.target.value)}
-              placeholder="Marie Kabila"
-              autoComplete="name"
-            />
-          </Field>
-          <Field label="E-mail" htmlFor="partner-admin-email">
-            <Input
-              id="partner-admin-email"
-              name="adminEmail"
-              type="email"
-              value={adminEmail}
-              onChange={(event) => setAdminEmail(event.target.value)}
-              placeholder="marie@exemple.com"
-              autoComplete="email"
-            />
-          </Field>
+      <section className="space-y-3">
+        <FormIntro
+          title="Ce que les shops remettent"
+          description="Choisissez le secteur. La récompense se règle toute seule, et vous pouvez la changer."
+        />
+        <div className="space-y-2">
+          <p className="text-sm font-medium" id="partner-sector-label">
+            Secteur
+          </p>
+          <div
+            role="group"
+            aria-labelledby="partner-sector-label"
+            className="grid grid-cols-3 gap-2"
+          >
+            {SECTORS.map((item) => (
+              <Choice
+                key={item.value}
+                pressed={kind === item.value}
+                title={item.label}
+                detail={item.detail}
+                onClick={() => chooseSector(item.value)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+        <div className="space-y-2">
+          <p className="text-sm font-medium" id="partner-reward-label">
+            Récompense
+          </p>
+          <div
+            role="group"
+            aria-labelledby="partner-reward-label"
+            className="space-y-2"
+          >
+            {REWARD_KINDS.map((item) => (
+              <Choice
+                key={item}
+                pressed={rewardKind === item}
+                title={rewardKindLabel(item)}
+                detail={rewardKindExamples(item)}
+                onClick={() => setRewardKind(item)}
+              />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Offres créées : {offers.join(", ")}.
+          </p>
+        </div>
+      </section>
+
+      <section className="space-y-3 rounded-2xl border border-dashed border-border bg-muted/30 p-4">
+        <FormIntro
+          title="Administrateur"
+          description="Facultatif. S’il est renseigné, il reçoit un lien pour choisir son mot de passe. Sinon, vous l’inviterez plus tard."
+        />
+        <Field label="Son nom" htmlFor="partner-admin-name">
+          <Input
+            id="partner-admin-name"
+            name="adminDisplayName"
+            value={adminName}
+            onChange={(event) => setAdminName(event.target.value)}
+            placeholder="Marie Kabila"
+            autoComplete="name"
+          />
+        </Field>
+        <Field label="Son e-mail" htmlFor="partner-admin-email">
+          <Input
+            id="partner-admin-email"
+            name="adminEmail"
+            type="email"
+            value={adminEmail}
+            onChange={(event) => setAdminEmail(event.target.value)}
+            placeholder="marie@exemple.com"
+            autoComplete="email"
+          />
+        </Field>
+      </section>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -201,5 +233,53 @@ export function CreatePartnerForm({
         {pending ? "Création…" : "Créer le partenaire"}
       </Button>
     </form>
+  )
+}
+
+function FormIntro({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <p className="mt-1 text-xs leading-5 text-muted-foreground">
+        {description}
+      </p>
+    </div>
+  )
+}
+
+function Choice({
+  pressed,
+  title,
+  detail,
+  onClick,
+}: {
+  pressed: boolean
+  title: string
+  detail: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cn(
+        "w-full rounded-2xl border px-3 py-3 text-left transition-colors",
+        pressed
+          ? "border-primary bg-primary/10"
+          : "border-border bg-background hover:bg-muted/60"
+      )}
+    >
+      <span className="block text-sm font-medium">{title}</span>
+      <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">
+        {detail}
+      </span>
+    </button>
   )
 }

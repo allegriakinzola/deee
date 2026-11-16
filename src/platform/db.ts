@@ -9,6 +9,9 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient
 }
 
+const revisions = new WeakMap<PrismaClient, string>()
+const CLIENT_REVISION = "partner-offer-image"
+
 function createPrismaClient(): PrismaClient {
   const adapter = new PrismaPg({ connectionString: getDatabaseUrl() })
   return new PrismaClient({ adapter })
@@ -29,10 +32,20 @@ function isCurrentClient(client: PrismaClient): boolean {
   )
 }
 
-const cached = globalForPrisma.prisma
-export const prisma =
-  cached && isCurrentClient(cached) ? cached : createPrismaClient()
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma
+function client(): PrismaClient {
+  const cached = globalForPrisma.prisma
+  if (cached && isCurrentClient(cached)) {
+    return cached
+  }
+  const created = createPrismaClient()
+  globalForPrisma.prisma = created
+  return created
 }
+
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop, receiver) {
+    const current = client()
+    const value = Reflect.get(current, prop, receiver)
+    return typeof value === "function" ? value.bind(current) : value
+  },
+})

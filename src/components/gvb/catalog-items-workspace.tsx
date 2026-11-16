@@ -7,6 +7,10 @@ import { ArrowLeftIcon, MoreHorizontalIcon, PlusIcon, SearchIcon } from "lucide-
 
 import { deleteJson, patchJson } from "@/lib/api"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
+import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
 import { CatalogMaterialFields } from "@/components/gvb/catalog-material-fields"
 import { CreateCatalogItemForm } from "@/components/gvb/create-catalog-item-form"
 import { Badge } from "@/components/ui/badge"
@@ -77,6 +81,7 @@ export function CatalogItemsWorkspace({
       `${item.category} ${item.name}`.toLowerCase().includes(needle)
     )
   }, [catalog.items, query])
+  const paged = usePagedRows(visible, query)
 
   async function setItemStatus(
     item: DirectoryCatalogItem,
@@ -115,7 +120,7 @@ export function CatalogItemsWorkspace({
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div>
         <Link
           href="/admin/catalogue"
@@ -224,7 +229,7 @@ export function CatalogItemsWorkspace({
                   </td>
                 </tr>
               ) : (
-                visible.map((item) => {
+                paged.rows.map((item) => {
                   const busy = pendingId === item.id
                   return (
                     <tr
@@ -299,6 +304,15 @@ export function CatalogItemsWorkspace({
             </tbody>
           </table>
         </DirectoryTableScroll>
+        <DirectoryPagination
+          page={paged.page}
+          pageCount={paged.pageCount}
+          total={paged.total}
+          from={paged.from}
+          to={paged.to}
+          emptyLabel="0 matériel"
+          onPage={paged.setPage}
+        />
       </section>
 
       <Sheet open={editCatalogOpen} onOpenChange={setEditCatalogOpen}>

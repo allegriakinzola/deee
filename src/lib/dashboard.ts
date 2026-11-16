@@ -1,5 +1,7 @@
 import { formatDayLabel, lastUtcDays } from "@/lib/period"
 
+export const ACTIVITY_HISTORY_DAYS = 365
+
 export type DailyBucket = {
   date: string
   confirmed: number

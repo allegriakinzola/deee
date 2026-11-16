@@ -1,6 +1,10 @@
 import "server-only"
 
-import { mergeDailySeries, mergeRecent } from "@/lib/dashboard"
+import {
+  ACTIVITY_HISTORY_DAYS,
+  mergeDailySeries,
+  mergeRecent,
+} from "@/lib/dashboard"
 import { canAccessShopSpace } from "@/modules/access"
 import type { AuthUser } from "@/modules/auth"
 import { summarizeShopDeposits } from "@/modules/deposits"
@@ -55,8 +59,8 @@ export async function getShopDashboard(
   const shopId = actor.shopId
 
   const [deposits, redeems] = await Promise.all([
-    summarizeShopDeposits(shopId),
-    summarizeShopRedeems(shopId),
+    summarizeShopDeposits(shopId, { historyDays: ACTIVITY_HISTORY_DAYS }),
+    summarizeShopRedeems(shopId, { historyDays: ACTIVITY_HISTORY_DAYS }),
   ])
 
   const recent = mergeRecent([
@@ -91,7 +95,11 @@ export async function getShopDashboard(
     pointsDebited30: redeems.pointsDebited30,
     bons30: redeems.bons30,
     usd30: redeems.usd30.toFixed(2),
-    daily: mergeDailySeries(deposits.daily, redeems.daily),
+    daily: mergeDailySeries(
+      deposits.daily,
+      redeems.daily,
+      ACTIVITY_HISTORY_DAYS
+    ),
     topMaterials: deposits.topMaterials,
     rewards: redeems.rewards.map((item) => ({
       label: item.label,

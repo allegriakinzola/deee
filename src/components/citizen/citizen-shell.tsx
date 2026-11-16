@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { BellIcon, UserIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { Logo } from "@/components/brand/logo"
 import { CitizenStage } from "@/components/citizen/citizen-stage"
+import { LogoutButton } from "@/components/gvb/logout-button"
 import {
   CitizenSideNav,
   CitizenTabBar,
@@ -29,64 +29,57 @@ export function CitizenShell({
           <p className="mt-3 text-sm text-zinc-500">Mbote, {firstName}</p>
         </div>
         <CitizenSideNav />
-        <div className="mt-auto shrink-0 border-t border-zinc-200/80 p-4">
-          <p className="truncate text-sm font-medium text-zinc-900">
-            {user.displayName}
-          </p>
-          <p className="truncate text-xs text-zinc-500">{user.email}</p>
+        <div className="mt-auto shrink-0 space-y-3 border-t border-zinc-200/80 p-4">
+          <Link href="/compte/profil" className="flex min-w-0 items-center gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+              {user.displayName.trim().charAt(0).toUpperCase() || "U"}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium text-zinc-900">
+                {user.displayName}
+              </span>
+              <span className="block truncate text-xs text-zinc-500">
+                {user.email}
+              </span>
+            </span>
+          </Link>
+          <LogoutButton />
         </div>
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="shrink-0 px-4 pt-[max(0.7rem,env(safe-area-inset-top))] lg:hidden">
-          <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <p className="text-[13px] text-zinc-500">Mbote, {firstName}</p>
-              <p className="truncate text-[17px] font-semibold tracking-tight text-zinc-900">
-                Déchets électriques et électroniques
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="relative flex size-11 items-center justify-center rounded-full bg-white text-zinc-500 ring-1 ring-zinc-200"
-                aria-label="Notifications"
-              >
-                <BellIcon className="size-5" />
+        <header className="shrink-0 border-b border-zinc-200/70 bg-white/90 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md lg:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <Logo />
+            <Link
+              href="/compte/profil"
+              className="flex min-w-0 items-center gap-2"
+              aria-label="Mon compte"
+            >
+              <span className="truncate text-sm text-zinc-500">
+                {firstName}
               </span>
-              <Link
-                href="/compte/profil"
-                className="flex size-11 items-center justify-center rounded-full bg-white text-zinc-500 ring-1 ring-zinc-200"
-                aria-label="Mon compte"
-              >
-                <UserIcon className="size-5" />
-              </Link>
-            </div>
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                {user.displayName.trim().charAt(0).toUpperCase() || "U"}
+              </span>
+            </Link>
           </div>
         </header>
 
         <header className="hidden shrink-0 items-center justify-between border-b border-zinc-200/80 bg-white/90 px-8 py-3.5 backdrop-blur-md lg:flex">
           <p className="text-sm text-zinc-500">
-            Déchets électriques et électroniques — mon compte
+            Mon espace · déchets électriques et électroniques
           </p>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-            >
-              Site public
-            </Link>
-            <Link
-              href="/compte/profil"
-              className="flex size-9 items-center justify-center rounded-full bg-[#f3f5f7] text-zinc-500 ring-1 ring-zinc-200"
-              aria-label="Mon compte"
-            >
-              <UserIcon className="size-4" />
-            </Link>
-          </div>
+          <Link
+            href="/"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+          >
+            Site public
+          </Link>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-4 pt-3 pb-3 lg:px-10 lg:py-8">
-          <div className="lg:mx-auto lg:max-w-5xl">{children}</div>
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-4 py-8 sm:px-6 lg:px-10">
+          <div className="w-full">{children}</div>
         </main>
 
         <CitizenTabBar />

@@ -5,7 +5,7 @@ La liste complète, avec le rôle, le shop, le code et le parcours, est dans `do
 Adresse locale : la valeur de `NEXT_PUBLIC_SITE_URL` dans `.env`.  
 Adresse déployée : https://deee.nexttechnologies.site
 
-L’administrateur GVB `gvb.admin@deee.local` est inchangé. Son mot de passe reste celui de `GVB_ADMIN_PASSWORD`.
+L’administrateur GVB `gvb.admin@deee.local` est inchangé. Son mot de passe est celui déjà défini pour ce compte.
 
 Les autres anciens comptes ont été retirés. Les nouveaux e-mails suivent l’entreprise : `partenaire@rawbank.deee.local`, `gombe@vodacom.deee.local`, `lemba@airtel.deee.local`, etc. Ce ne sont pas des boîtes réelles.
 

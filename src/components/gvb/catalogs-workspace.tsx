@@ -12,6 +12,10 @@ import {
 
 import { deleteJson, patchJson } from "@/lib/api"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
+import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
 import { CreateCatalogForm } from "@/components/gvb/create-catalog-form"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -77,6 +81,7 @@ export function CatalogsWorkspace({
         .includes(needle)
     )
   }, [catalogs, query])
+  const paged = usePagedRows(visible, query)
 
   async function setStatus(
     catalog: DirectoryCatalog,
@@ -112,7 +117,7 @@ export function CatalogsWorkspace({
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
@@ -200,7 +205,7 @@ export function CatalogsWorkspace({
                   </td>
                 </tr>
               ) : (
-                visible.map((catalog) => {
+                paged.rows.map((catalog) => {
                   const busy = pendingId === catalog.id
                   return (
                     <tr
@@ -287,6 +292,15 @@ export function CatalogsWorkspace({
             </tbody>
           </table>
         </DirectoryTableScroll>
+        <DirectoryPagination
+          page={paged.page}
+          pageCount={paged.pageCount}
+          total={paged.total}
+          from={paged.from}
+          to={paged.to}
+          emptyLabel="0 catalogue"
+          onPage={paged.setPage}
+        />
       </section>
 
       <Sheet open={createOpen} onOpenChange={setCreateOpen}>

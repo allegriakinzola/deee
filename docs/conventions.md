@@ -33,7 +33,7 @@ Les Client Components n’importent **que des types** depuis un module (`import 
 
 Donc le seed :
 
-- peut importer des helpers **sans** `server-only` (ex. `gvb-admin-profile.ts`, `platform/password.ts`) ;
+- peut importer des helpers **sans** `server-only` (ex. `platform/password.ts`) ;
 - ne doit **pas** importer `platform/db.ts` ni un `repository.ts` ;
 - ouvre sa propre connexion Prisma, puis se déconnecte.
 

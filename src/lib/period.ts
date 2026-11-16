@@ -19,8 +19,17 @@ export function utcDayKey(date: Date): string {
 export function formatDayLabel(iso: string): string {
   const [year, month, day] = iso.split("-").map(Number)
   return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("fr-FR", {
-    weekday: "short",
     day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  })
+}
+
+export function formatMonthLabel(iso: string): string {
+  const [year, month] = iso.split("-").map(Number)
+  return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString("fr-FR", {
+    month: "short",
+    year: "2-digit",
     timeZone: "UTC",
   })
 }

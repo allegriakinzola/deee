@@ -181,6 +181,8 @@ model PartnerOffer {
   partner   Partner       @relation(fields: [partnerId], references: [id], onDelete: Cascade)
   label     String
   kind      RewardKind
+  /// Photo facultative. Le citoyen la voit en choisissant l’offre.
+  image     String?
   sortOrder Int           @default(0)
   status    CatalogStatus @default(ACTIVE)
   createdAt DateTime      @default(now())

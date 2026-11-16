@@ -108,8 +108,7 @@ Un **échange** suit : le citoyen envoie une demande (`SENT`) avec un nombre de 
 
 Les URLs viennent **telles quelles** de `.env` :
 
-- App : `DATABASE_URL` (poolée)
-- Migrations : `DIRECT_URL` (directe)
+- Base : `DATABASE_URL`, pour l’application et les migrations
 - Origine du site : `NEXT_PUBLIC_SITE_URL` — aucun `localhost` en dur dans le code. Un lien espace GVB se construit avec `absoluteUrl(homePathFor(role))`.
 
 ```bash
@@ -118,6 +117,6 @@ npm run db:deploy
 npm run db:seed
 ```
 
-Le seed crée (ou met à jour) l’administrateur GVB à partir de `GVB_ADMIN_EMAIL` et `GVB_ADMIN_PASSWORD`, les **paramètres opérateur** (1 bon = 10 USD) s’ils n’existent pas, et les **matériels** DEEE manquants (noms groupés avec `/` retirés).
+Le seed crée les **paramètres opérateur** (1 bon = 10 USD) s’ils n’existent pas, et les **matériels** DEEE manquants (noms groupés avec `/` retirés). Il ne crée pas l’administrateur.
 
 Un `docker-compose.yml` existe en repli local ; le projet se développe contre Neon.

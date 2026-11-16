@@ -1,6 +1,10 @@
 import "server-only"
 
-import { mergeDailySeries, mergeRecent } from "@/lib/dashboard"
+import {
+  ACTIVITY_HISTORY_DAYS,
+  mergeDailySeries,
+  mergeRecent,
+} from "@/lib/dashboard"
 import { canAccessPartnerAdmin } from "@/modules/access"
 import type { AuthUser } from "@/modules/auth"
 import { summarizeDeposits } from "@/modules/deposits"
@@ -76,8 +80,14 @@ export async function getPartnerDashboard(
 
   const [deposits, redeems, shops, shopsActive, members, directory] =
     await Promise.all([
-      summarizeDeposits({ partnerId }),
-      summarizeRedeems({ partnerId }),
+      summarizeDeposits(
+        { partnerId },
+        { historyDays: ACTIVITY_HISTORY_DAYS }
+      ),
+      summarizeRedeems(
+        { partnerId },
+        { historyDays: ACTIVITY_HISTORY_DAYS }
+      ),
       countDirectoryShops({ partnerId }),
       countDirectoryShops({ partnerId, status: "ACTIVE" }),
       countDirectoryPartnerMembers(partnerId),
@@ -106,7 +116,11 @@ export async function getPartnerDashboard(
     rejectedRedeems30: redeems.rejected30,
     bons30: redeems.bons30,
     usd30: redeems.usd30.toFixed(2),
-    daily: mergeDailySeries(deposits.daily, redeems.daily),
+    daily: mergeDailySeries(
+      deposits.daily,
+      redeems.daily,
+      ACTIVITY_HISTORY_DAYS
+    ),
     shopRows: directory.map((shop) => ({
       id: shop.id,
       name: shop.name,

@@ -8,7 +8,16 @@ export { sendDraftToShop } from "./send-draft"
 export { cancelCitizenDeposit } from "./cancel-deposit"
 export { listCitizenDepositHistory } from "./list-citizen"
 export { listShopInbox } from "./list-shop"
-export { listAdminDeposits, listPartnerDeposits } from "./list-register"
+export {
+  listAdminDeposits,
+  listPartnerDeposits,
+  readDepositQuery,
+} from "./list-register"
+export type {
+  DepositRegisterQuery,
+  DepositRegisterResult,
+  DepositStatusFilter,
+} from "./list-register"
 export { summarizeDeposits, summarizeShopDeposits } from "./summarize-shop"
 export type { CitizenDashboard } from "./get-citizen-dashboard"
 export { getCitizenDashboard } from "./get-citizen-dashboard"

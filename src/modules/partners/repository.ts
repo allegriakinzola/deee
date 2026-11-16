@@ -121,6 +121,7 @@ export async function createOfferRecord(input: {
   label: string
   kind: RewardKind
   sortOrder: number
+  image?: string | null
 }) {
   return prisma.partnerOffer.create({ data: input })
 }
@@ -131,11 +132,22 @@ export async function findOfferForPartner(partnerId: string, offerId: string) {
   })
 }
 
-export async function updateOfferLabel(offerId: string, label: string) {
+export async function updateOfferRecord(
+  offerId: string,
+  data: { label?: string; image?: string | null }
+) {
   return prisma.partnerOffer.update({
     where: { id: offerId },
-    data: { label },
+    data,
   })
+}
+
+export async function listPartnerOfferImages(partnerId: string) {
+  const rows = await prisma.partnerOffer.findMany({
+    where: { partnerId },
+    select: { image: true },
+  })
+  return rows.flatMap((row) => (row.image ? [row.image] : []))
 }
 
 export async function deleteOfferRecord(offerId: string) {

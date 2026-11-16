@@ -1,6 +1,10 @@
 import "server-only"
 
-import { mergeDailySeries, mergeRecent } from "@/lib/dashboard"
+import {
+  ACTIVITY_HISTORY_DAYS,
+  mergeDailySeries,
+  mergeRecent,
+} from "@/lib/dashboard"
 import { canAccessGvbAdmin } from "@/modules/access"
 import type { AuthUser } from "@/modules/auth"
 import { summarizeDeposits } from "@/modules/deposits"
@@ -8,6 +12,7 @@ import { countDirectoryMaterials } from "@/modules/materials"
 import { countDirectoryPartners } from "@/modules/partners"
 import { summarizeRedeems } from "@/modules/redeems"
 import { countDirectoryShops } from "@/modules/shops"
+import { prisma } from "@/platform/db"
 import { AppError, ErrorCode } from "@/platform/errors"
 
 import { countUsersByRole } from "./repository"
@@ -26,6 +31,7 @@ export type AdminDashboard = {
   confirmedDeposits30: number
   rejectedDeposits30: number
   pointsCredited30: number
+  pointsOutstanding: number
   confirmedRedeems30: number
   rejectedRedeems30: number
   bons30: number
@@ -81,15 +87,17 @@ export async function getAdminDashboard(
     shopsActive,
     materials,
     roles,
+    outstanding,
   ] = await Promise.all([
-    summarizeDeposits(),
-    summarizeRedeems(),
+    summarizeDeposits({}, { historyDays: ACTIVITY_HISTORY_DAYS }),
+    summarizeRedeems({}, { historyDays: ACTIVITY_HISTORY_DAYS }),
     countDirectoryPartners(),
     countDirectoryPartners("ACTIVE"),
     countDirectoryShops(),
     countDirectoryShops({ status: "ACTIVE" }),
     countDirectoryMaterials("ACTIVE"),
     countUsersByRole(),
+    prisma.ledgerEntry.aggregate({ _sum: { points: true } }),
   ])
 
   const redeemByShop = new Map(redeems.byShop.map((item) => [item.id, item]))
@@ -111,11 +119,16 @@ export async function getAdminDashboard(
     confirmedDeposits30: deposits.confirmed30,
     rejectedDeposits30: deposits.rejected30,
     pointsCredited30: deposits.pointsCredited30,
+    pointsOutstanding: outstanding._sum.points ?? 0,
     confirmedRedeems30: redeems.confirmed30,
     rejectedRedeems30: redeems.rejected30,
     bons30: redeems.bons30,
     usd30: redeems.usd30.toFixed(2),
-    daily: mergeDailySeries(deposits.daily, redeems.daily),
+    daily: mergeDailySeries(
+      deposits.daily,
+      redeems.daily,
+      ACTIVITY_HISTORY_DAYS
+    ),
     topShops: deposits.byShop.slice(0, 6).map((shop) => ({
       name: shop.name,
       deposits: shop.confirmed,

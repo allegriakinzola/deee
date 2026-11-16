@@ -1,29 +1,59 @@
-"use client"
-
 import {
+  GiftIcon,
   LayoutDashboardIcon,
   RecycleIcon,
   SparklesIcon,
-  GiftIcon,
   StoreIcon,
   UserCogIcon,
 } from "lucide-react"
 
-import { SpaceNav } from "@/components/workspace/space-nav"
+import type { WorkspaceGroup } from "@/components/workspace/workspace-shell"
+import type { SpaceNavItem } from "@/components/workspace/space-nav"
 
-const ITEMS = [
-  { href: "/partenaire", label: "Tableau de bord", icon: LayoutDashboardIcon },
-  {
-    href: "/partenaire/utilisateurs",
-    label: "Utilisateurs",
-    icon: UserCogIcon,
-  },
-  { href: "/partenaire/shops", label: "Shops", icon: StoreIcon },
-  { href: "/partenaire/offres", label: "Offres", icon: GiftIcon },
-  { href: "/partenaire/depots", label: "Dépôts", icon: RecycleIcon },
-  { href: "/partenaire/echanges", label: "Échanges", icon: SparklesIcon },
-] as const
-
-export function PartnerNav({ variant }: { variant: "side" | "mobile" }) {
-  return <SpaceNav items={ITEMS} variant={variant} homeHref="/partenaire" />
+const dashboard: SpaceNavItem = {
+  href: "/partenaire",
+  label: "Tableau de bord",
+  shortLabel: "Accueil",
+  icon: LayoutDashboardIcon,
 }
+const users: SpaceNavItem = {
+  href: "/partenaire/utilisateurs",
+  label: "Utilisateurs",
+  shortLabel: "Équipe",
+  icon: UserCogIcon,
+}
+const shops: SpaceNavItem = {
+  href: "/partenaire/shops",
+  label: "Shops",
+  icon: StoreIcon,
+}
+const offers: SpaceNavItem = {
+  href: "/partenaire/offres",
+  label: "Offres",
+  icon: GiftIcon,
+}
+const deposits: SpaceNavItem = {
+  href: "/partenaire/depots",
+  label: "Dépôts",
+  icon: RecycleIcon,
+}
+const redeems: SpaceNavItem = {
+  href: "/partenaire/echanges",
+  label: "Échanges",
+  icon: SparklesIcon,
+}
+
+export const PARTNER_GROUPS: WorkspaceGroup[] = [
+  { label: "Pilotage", items: [dashboard, users] },
+  { label: "Réseau", items: [shops, offers] },
+  { label: "Activité", items: [deposits, redeems] },
+]
+
+export const PARTNER_MOBILE: SpaceNavItem[] = [
+  dashboard,
+  shops,
+  offers,
+  deposits,
+  redeems,
+  users,
+]

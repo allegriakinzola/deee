@@ -39,6 +39,7 @@ export async function getShopRedeemOffers(
     rewards: offers.map((offer) => ({
       id: offer.id,
       label: offer.label,
+      image: offer.image,
       usd: Number.isFinite(usd) ? usd : 0,
     })),
   }

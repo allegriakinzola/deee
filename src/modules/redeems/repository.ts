@@ -65,6 +65,41 @@ export async function listShopRedeems(shopId: string, statuses: RedeemStatus[]) 
   })
 }
 
+function textSearch(q: string) {
+  const query = q.trim()
+  if (!query) {
+    return null
+  }
+  return {
+    OR: [
+      {
+        citizen: {
+          displayName: { contains: query, mode: "insensitive" as const },
+        },
+      },
+      { rewardLabel: { contains: query, mode: "insensitive" as const } },
+      { shop: { name: { contains: query, mode: "insensitive" as const } } },
+      { shop: { code: { contains: query, mode: "insensitive" as const } } },
+      { shop: { area: { contains: query, mode: "insensitive" as const } } },
+      {
+        shop: {
+          partner: { name: { contains: query, mode: "insensitive" as const } },
+        },
+      },
+    ],
+  }
+}
+
+function matchingWhere(
+  scope: RedeemScope,
+  statuses: RedeemStatus[],
+  q: string
+) {
+  const search = textSearch(q)
+  const scoped = redeemWhere(scope, statuses)
+  return search ? { AND: [scoped, search] } : scoped
+}
+
 export async function listScopedRedeems(
   scope: RedeemScope,
   statuses: RedeemStatus[],
@@ -75,6 +110,42 @@ export async function listScopedRedeems(
     include: redeemInclude,
     orderBy: { createdAt: "desc" },
     take,
+  })
+}
+
+export async function listScopedRedeemsPage(
+  scope: RedeemScope,
+  statuses: RedeemStatus[],
+  page: { skip: number; take: number; q: string }
+) {
+  return prisma.redeem.findMany({
+    where: matchingWhere(scope, statuses, page.q),
+    include: redeemInclude,
+    orderBy: { createdAt: "desc" },
+    skip: page.skip,
+    take: page.take,
+  })
+}
+
+export async function countScopedRedeems(
+  scope: RedeemScope,
+  statuses: RedeemStatus[],
+  q: string
+) {
+  return prisma.redeem.count({
+    where: matchingWhere(scope, statuses, q),
+  })
+}
+
+export async function countScopedRedeemsByStatus(
+  scope: RedeemScope,
+  statuses: RedeemStatus[],
+  q: string
+) {
+  return prisma.redeem.groupBy({
+    by: ["status"],
+    where: matchingWhere(scope, statuses, q),
+    _count: { _all: true },
   })
 }
 

@@ -76,6 +76,45 @@ export async function listShopDeposits(shopId: string, statuses: DepositStatus[]
   })
 }
 
+function textSearch(q: string) {
+  const query = q.trim()
+  if (!query) {
+    return null
+  }
+  return {
+    OR: [
+      {
+        citizen: {
+          displayName: { contains: query, mode: "insensitive" as const },
+        },
+      },
+      { shop: { name: { contains: query, mode: "insensitive" as const } } },
+      { shop: { code: { contains: query, mode: "insensitive" as const } } },
+      { shop: { area: { contains: query, mode: "insensitive" as const } } },
+      {
+        shop: {
+          partner: { name: { contains: query, mode: "insensitive" as const } },
+        },
+      },
+      {
+        lines: {
+          some: { name: { contains: query, mode: "insensitive" as const } },
+        },
+      },
+    ],
+  }
+}
+
+function matchingWhere(
+  scope: DepositScope,
+  statuses: DepositStatus[],
+  q: string
+) {
+  const search = textSearch(q)
+  const scoped = depositWhere(scope, statuses)
+  return search ? { AND: [scoped, search] } : scoped
+}
+
 export async function listScopedDeposits(
   scope: DepositScope,
   statuses: DepositStatus[],
@@ -86,6 +125,42 @@ export async function listScopedDeposits(
     include: depositInclude,
     orderBy: { createdAt: "desc" },
     take,
+  })
+}
+
+export async function listScopedDepositsPage(
+  scope: DepositScope,
+  statuses: DepositStatus[],
+  page: { skip: number; take: number; q: string }
+) {
+  return prisma.deposit.findMany({
+    where: matchingWhere(scope, statuses, page.q),
+    include: depositInclude,
+    orderBy: { createdAt: "desc" },
+    skip: page.skip,
+    take: page.take,
+  })
+}
+
+export async function countScopedDeposits(
+  scope: DepositScope,
+  statuses: DepositStatus[],
+  q: string
+) {
+  return prisma.deposit.count({
+    where: matchingWhere(scope, statuses, q),
+  })
+}
+
+export async function countScopedDepositsByStatus(
+  scope: DepositScope,
+  statuses: DepositStatus[],
+  q: string
+) {
+  return prisma.deposit.groupBy({
+    by: ["status"],
+    where: matchingWhere(scope, statuses, q),
+    _count: { _all: true },
   })
 }
 

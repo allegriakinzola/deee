@@ -8,6 +8,7 @@ import { assertCanManagePartners } from "./assert-manager"
 import {
   deletePartnerRecord,
   findPartnerById,
+  listPartnerOfferImages,
   reassignAndDeleteMember,
 } from "./repository"
 

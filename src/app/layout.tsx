@@ -17,7 +17,7 @@ const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
 })
 
-const siteUrl = getSiteUrl()
+export const dynamic = "force-dynamic"
 
 export const viewport: Viewport = {
   themeColor: "#C6EBC9",
@@ -25,8 +25,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+export async function generateMetadata(): Promise<Metadata> {
+  const siteUrl = getSiteUrl()
+
+  return {
+    metadataBase: new URL(siteUrl),
   title: {
     default: SITE_TITLE,
     template: `%s · ${SITE_NAME}`,
@@ -75,6 +78,7 @@ export const metadata: Metadata = {
     "geo.region": "CD-KN",
     "geo.placename": "Kinshasa",
   },
+  }
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

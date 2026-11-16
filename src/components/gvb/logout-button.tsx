@@ -6,7 +6,11 @@ import { useState } from "react"
 import { postJson } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 
-export function LogoutButton() {
+export function LogoutButton({
+  size = "sm",
+}: {
+  size?: "sm" | "lg"
+} = {}) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
 
@@ -25,7 +29,7 @@ export function LogoutButton() {
     <Button
       type="button"
       variant="outline"
-      size="sm"
+      size={size}
       disabled={pending}
       onClick={onLogout}
     >

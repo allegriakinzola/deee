@@ -24,6 +24,7 @@ export type DirectoryRedeem = {
 export type ShopRedeemOffer = {
   id: string
   label: string
+  image: string | null
   usd: number
 }
 

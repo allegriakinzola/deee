@@ -65,77 +65,81 @@ export function CreateShopForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-4">
-      <Field label="Nom du shop" htmlFor="shop-name">
-        <Input
-          id="shop-name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Vodacom Gombe"
-          required
+    <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-6">
+      <section className="space-y-3">
+        <FormIntro
+          title="Le shop"
+          description="Le nom que les citoyens voient, et l’une des 24 communes."
         />
-      </Field>
-      <Field
-        label="Commune"
-        htmlFor="shop-area"
-        hint="Les 24 communes de Kinshasa."
-      >
-        <CommuneSelect
-          id="shop-area"
-          value={area}
-          onChange={setArea}
-          required
-        />
-      </Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Latitude" htmlFor="shop-lat" hint="Exemple : -4,305">
+        <Field label="Nom" htmlFor="shop-name" hint="Exemple : Vodacom Gombe.">
           <Input
-            id="shop-lat"
-            inputMode="decimal"
-            value={lat}
-            onChange={(event) => setLat(event.target.value)}
-            placeholder="-4,305"
+            id="shop-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Vodacom Gombe"
+            autoComplete="organization"
             required
           />
         </Field>
-        <Field label="Longitude" htmlFor="shop-lng" hint="Exemple : 15,313">
-          <Input
-            id="shop-lng"
-            inputMode="decimal"
-            value={lng}
-            onChange={(event) => setLng(event.target.value)}
-            placeholder="15,313"
-            required
-          />
+        <Field label="Commune" htmlFor="shop-area">
+          <CommuneSelect id="shop-area" value={area} onChange={setArea} required />
         </Field>
-      </div>
+      </section>
 
-      <div className="rounded-2xl bg-muted/40 p-4">
-        <p className="text-sm font-medium">Compte du shop (facultatif)</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Un seul login par boutique. La personne choisira son mot de passe via
-          le lien d’invitation. Vous pourrez aussi l’inviter plus tard.
-        </p>
-        <div className="mt-3 space-y-3">
-          <Field label="Nom" htmlFor="shop-operator-name">
+      <section className="space-y-3">
+        <FormIntro
+          title="Sur la carte"
+          description="La position du comptoir. À Kinshasa, la latitude est proche de -4,3 et la longitude de 15,3."
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Latitude" htmlFor="shop-lat">
             <Input
-              id="shop-operator-name"
-              value={operatorName}
-              onChange={(event) => setOperatorName(event.target.value)}
-              placeholder="Jean Mbala"
+              id="shop-lat"
+              inputMode="decimal"
+              value={lat}
+              onChange={(event) => setLat(event.target.value)}
+              placeholder="-4,305"
+              required
             />
           </Field>
-          <Field label="E-mail" htmlFor="shop-operator-email">
+          <Field label="Longitude" htmlFor="shop-lng">
             <Input
-              id="shop-operator-email"
-              type="email"
-              value={operatorEmail}
-              onChange={(event) => setOperatorEmail(event.target.value)}
-              placeholder="gombe@exemple.com"
+              id="shop-lng"
+              inputMode="decimal"
+              value={lng}
+              onChange={(event) => setLng(event.target.value)}
+              placeholder="15,313"
+              required
             />
           </Field>
         </div>
-      </div>
+      </section>
+
+      <section className="space-y-3 rounded-2xl border border-dashed border-border bg-muted/30 p-4">
+        <FormIntro
+          title="Compte du shop"
+          description="Facultatif. Un seul login. S’il est renseigné, la personne reçoit un lien pour choisir son mot de passe. Sinon, vous l’inviterez plus tard."
+        />
+        <Field label="Son nom" htmlFor="shop-operator-name">
+          <Input
+            id="shop-operator-name"
+            value={operatorName}
+            onChange={(event) => setOperatorName(event.target.value)}
+            placeholder="Jean Mbala"
+            autoComplete="name"
+          />
+        </Field>
+        <Field label="Son e-mail" htmlFor="shop-operator-email">
+          <Input
+            id="shop-operator-email"
+            type="email"
+            value={operatorEmail}
+            onChange={(event) => setOperatorEmail(event.target.value)}
+            placeholder="gombe@exemple.com"
+            autoComplete="email"
+          />
+        </Field>
+      </section>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -147,5 +151,20 @@ export function CreateShopForm({
         {pending ? "Création…" : "Créer le shop"}
       </Button>
     </form>
+  )
+}
+
+function FormIntro({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+    </div>
   )
 }

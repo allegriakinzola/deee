@@ -16,6 +16,7 @@ export type DirectoryPartnerOffer = {
   id: string
   label: string
   kind: RewardKind
+  image: string | null
   sortOrder: number
 }
 
@@ -47,6 +48,7 @@ export async function listOwnPartnerOffers(
         id: row.id,
         label: row.label,
         kind: row.kind,
+        image: row.image,
         sortOrder: row.sortOrder,
       })),
   }

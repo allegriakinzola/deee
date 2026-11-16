@@ -58,9 +58,12 @@ export type ShopRedeemSummary = {
 }
 
 export async function summarizeRedeems(
-  scope: RedeemScope = {}
+  scope: RedeemScope = {},
+  options: { historyDays?: number } = {}
 ): Promise<ShopRedeemSummary> {
-  const since = daysAgoUtc(29)
+  const historyDays = Math.max(30, options.historyDays ?? 30)
+  const since = daysAgoUtc(historyDays - 1)
+  const metricsSince = daysAgoUtc(29)
   const [pending, rows, pendingByShop] = await Promise.all([
     countRedeems(scope, ["SENT"]),
     listRedeemsSince(scope, ["CONFIRMED", "REJECTED"], since),
@@ -81,10 +84,6 @@ export async function summarizeRedeems(
     if (row.status === "CONFIRMED" && row.confirmedAt) {
       const usd = Number(row.usdValue)
       const safeUsd = Number.isFinite(usd) ? usd : 0
-      confirmed30 += 1
-      pointsDebited30 += row.points
-      bons30 += row.bons
-      usd30 += safeUsd
       const key = utcDayKey(row.confirmedAt)
       const current = dailyMap.get(key) ?? {
         date: key,
@@ -94,46 +93,56 @@ export async function summarizeRedeems(
       current.confirmed += 1
       current.points += row.points
       dailyMap.set(key, current)
-      const reward = rewards.get(row.rewardLabel) ?? {
-        label: row.rewardLabel,
-        count: 0,
-        bons: 0,
-        usd: 0,
-      }
-      reward.count += 1
-      reward.bons += row.bons
-      reward.usd += safeUsd
-      rewards.set(row.rewardLabel, reward)
+      if (row.confirmedAt >= metricsSince) {
+        confirmed30 += 1
+        pointsDebited30 += row.points
+        bons30 += row.bons
+        usd30 += safeUsd
+        const reward = rewards.get(row.rewardLabel) ?? {
+          label: row.rewardLabel,
+          count: 0,
+          bons: 0,
+          usd: 0,
+        }
+        reward.count += 1
+        reward.bons += row.bons
+        reward.usd += safeUsd
+        rewards.set(row.rewardLabel, reward)
 
-      const shop = shops.get(row.shop.id) ?? {
-        id: row.shop.id,
-        name: row.shop.name,
-        confirmed: 0,
-        points: 0,
-        bons: 0,
-        usd: 0,
-      }
-      shop.confirmed += 1
-      shop.points += row.points
-      shop.bons += row.bons
-      shop.usd += safeUsd
-      shops.set(row.shop.id, shop)
+        const shop = shops.get(row.shop.id) ?? {
+          id: row.shop.id,
+          name: row.shop.name,
+          confirmed: 0,
+          points: 0,
+          bons: 0,
+          usd: 0,
+        }
+        shop.confirmed += 1
+        shop.points += row.points
+        shop.bons += row.bons
+        shop.usd += safeUsd
+        shops.set(row.shop.id, shop)
 
-      const partner = partners.get(row.shop.partner.id) ?? {
-        id: row.shop.partner.id,
-        name: row.shop.partner.name,
-        confirmed: 0,
-        points: 0,
-        bons: 0,
-        usd: 0,
+        const partner = partners.get(row.shop.partner.id) ?? {
+          id: row.shop.partner.id,
+          name: row.shop.partner.name,
+          confirmed: 0,
+          points: 0,
+          bons: 0,
+          usd: 0,
+        }
+        partner.confirmed += 1
+        partner.points += row.points
+        partner.bons += row.bons
+        partner.usd += safeUsd
+        partners.set(row.shop.partner.id, partner)
       }
-      partner.confirmed += 1
-      partner.points += row.points
-      partner.bons += row.bons
-      partner.usd += safeUsd
-      partners.set(row.shop.partner.id, partner)
     }
-    if (row.status === "REJECTED") {
+    if (
+      row.status === "REJECTED" &&
+      row.rejectedAt &&
+      row.rejectedAt >= metricsSince
+    ) {
       rejected30 += 1
     }
   }
@@ -167,7 +176,8 @@ export async function summarizeRedeems(
 }
 
 export async function summarizeShopRedeems(
-  shopId: string
+  shopId: string,
+  options: { historyDays?: number } = {}
 ): Promise<ShopRedeemSummary> {
-  return summarizeRedeems({ shopId })
+  return summarizeRedeems({ shopId }, options)
 }

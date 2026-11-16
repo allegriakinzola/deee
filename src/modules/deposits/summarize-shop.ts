@@ -53,9 +53,12 @@ export type ShopDepositSummary = {
 }
 
 export async function summarizeDeposits(
-  scope: DepositScope = {}
+  scope: DepositScope = {},
+  options: { historyDays?: number } = {}
 ): Promise<ShopDepositSummary> {
-  const since = daysAgoUtc(29)
+  const historyDays = Math.max(30, options.historyDays ?? 30)
+  const since = daysAgoUtc(historyDays - 1)
+  const metricsSince = daysAgoUtc(29)
   const [pending, rows, pendingByShop] = await Promise.all([
     countDeposits(scope, ["SENT"]),
     listDepositsSince(scope, ["CONFIRMED", "REJECTED"], since),
@@ -73,8 +76,6 @@ export async function summarizeDeposits(
   for (const row of rows) {
     const points = pointsOfLines(row.lines)
     if (row.status === "CONFIRMED" && row.confirmedAt) {
-      confirmed30 += 1
-      pointsCredited30 += points
       const key = utcDayKey(row.confirmedAt)
       const current = dailyMap.get(key) ?? {
         date: key,
@@ -84,38 +85,46 @@ export async function summarizeDeposits(
       current.confirmed += 1
       current.points += points
       dailyMap.set(key, current)
-      for (const line of row.lines) {
-        const item = materials.get(line.name) ?? {
-          name: line.name,
-          quantity: 0,
-          points: 0,
+      if (row.confirmedAt >= metricsSince) {
+        confirmed30 += 1
+        pointsCredited30 += points
+        for (const line of row.lines) {
+          const item = materials.get(line.name) ?? {
+            name: line.name,
+            quantity: 0,
+            points: 0,
+          }
+          item.quantity += line.quantity
+          item.points += line.quantity * line.pointsEach
+          materials.set(line.name, item)
         }
-        item.quantity += line.quantity
-        item.points += line.quantity * line.pointsEach
-        materials.set(line.name, item)
-      }
-      if (row.shop) {
-        const shop = shops.get(row.shop.id) ?? {
-          id: row.shop.id,
-          name: row.shop.name,
-          confirmed: 0,
-          points: 0,
+        if (row.shop) {
+          const shop = shops.get(row.shop.id) ?? {
+            id: row.shop.id,
+            name: row.shop.name,
+            confirmed: 0,
+            points: 0,
+          }
+          shop.confirmed += 1
+          shop.points += points
+          shops.set(row.shop.id, shop)
+          const partner = partners.get(row.shop.partner.id) ?? {
+            id: row.shop.partner.id,
+            name: row.shop.partner.name,
+            confirmed: 0,
+            points: 0,
+          }
+          partner.confirmed += 1
+          partner.points += points
+          partners.set(row.shop.partner.id, partner)
         }
-        shop.confirmed += 1
-        shop.points += points
-        shops.set(row.shop.id, shop)
-        const partner = partners.get(row.shop.partner.id) ?? {
-          id: row.shop.partner.id,
-          name: row.shop.partner.name,
-          confirmed: 0,
-          points: 0,
-        }
-        partner.confirmed += 1
-        partner.points += points
-        partners.set(row.shop.partner.id, partner)
       }
     }
-    if (row.status === "REJECTED") {
+    if (
+      row.status === "REJECTED" &&
+      row.rejectedAt &&
+      row.rejectedAt >= metricsSince
+    ) {
       rejected30 += 1
     }
   }
@@ -147,7 +156,8 @@ export async function summarizeDeposits(
 }
 
 export async function summarizeShopDeposits(
-  shopId: string
+  shopId: string,
+  options: { historyDays?: number } = {}
 ): Promise<ShopDepositSummary> {
-  return summarizeDeposits({ shopId })
+  return summarizeDeposits({ shopId }, options)
 }

@@ -17,17 +17,29 @@ const TABS = [
   { href: "/compte", label: "Accueil", icon: HouseIcon, exact: true },
   { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
   { href: "/compte/echange", label: "Échanger", icon: SparklesIcon },
+  { href: "/compte/catalogue", label: "Catalogue", icon: SmartphoneIcon },
   { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
   { href: "/compte/profil", label: "Compte", icon: UserIcon },
 ] as const
 
-const SIDE = [
-  { href: "/compte", label: "Accueil", icon: HouseIcon, exact: true },
-  { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
-  { href: "/compte/profil", label: "Compte", icon: UserIcon },
-  { href: "/compte/depot", label: "Dépôt", icon: RecycleIcon },
-  { href: "/compte/echange", label: "Échanger", icon: SparklesIcon },
-  { href: "/compte/catalogue", label: "Catalogue", icon: SmartphoneIcon },
+const SIDE_GROUPS = [
+  {
+    label: "Aujourd’hui",
+    items: [{ href: "/compte", label: "Accueil", icon: HouseIcon, exact: true }],
+  },
+  {
+    label: "Agir",
+    items: [
+      { href: "/compte/depot", label: "Déposer", icon: RecycleIcon },
+      { href: "/compte/echange", label: "Échanger", icon: SparklesIcon },
+      { href: "/compte/catalogue", label: "Catalogue", icon: SmartphoneIcon },
+      { href: "/compte/shops", label: "Shops", icon: MapPinIcon },
+    ],
+  },
+  {
+    label: "Moi",
+    items: [{ href: "/compte/profil", label: "Compte", icon: UserIcon }],
+  },
 ] as const
 
 function isActive(
@@ -67,8 +79,8 @@ export function CitizenTabBar() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "flex min-h-12 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-xl",
-                active ? "text-emerald-800" : "text-zinc-400"
+                "flex min-h-14 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-xl",
+                active ? "bg-emerald-50 text-emerald-800" : "text-zinc-400"
               )}
             >
               <Icon className="size-5" strokeWidth={active ? 2.4 : 2} />
@@ -85,44 +97,35 @@ export function CitizenSideNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3">
-      {SIDE.map((item) => {
-        const Icon = item.icon
-        if ("soon" in item && item.soon) {
-          return (
-            <span
-              key={item.label}
-              className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-zinc-400"
-            >
-              <span className="flex items-center gap-2.5">
-                <Icon className="size-4" />
-                {item.label}
-              </span>
-              <span className="text-[10px] font-medium tracking-wide uppercase">
-                Bientôt
-              </span>
-            </span>
-          )
-        }
-
-        const active = isActive(pathname, item)
-
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium",
-              active
-                ? "bg-primary/35 text-foreground"
-                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-            )}
-          >
-            <Icon className="size-4" strokeWidth={active ? 2.4 : 2} />
-            {item.label}
-          </Link>
-        )
-      })}
+    <nav className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-3 py-4">
+      {SIDE_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className="px-3 pb-2 text-[11px] font-semibold tracking-[0.16em] text-zinc-400 uppercase">
+            {group.label}
+          </p>
+          <div className="flex flex-col gap-1">
+            {group.items.map((item) => {
+              const Icon = item.icon
+              const active = isActive(pathname, item)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex min-h-11 items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium",
+                    active
+                      ? "bg-emerald-50 text-emerald-900"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                  )}
+                >
+                  <Icon className="size-4" strokeWidth={active ? 2.4 : 2} />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   )
 }

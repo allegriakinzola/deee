@@ -30,6 +30,6 @@ Les changements se font dans l’application. Il n’y a pas d’accès direct �
 1. `npm run db:deploy` applique les migrations.
 2. `npm run build` prépare l’application.
 3. `npm start` lance le site. Le temps réel passe par `GET /api/v1/live`, une requête HTTP que `next start` sait servir. L’adresse socket `/live` répondait 404, parce que Next ne l’expose pas.
-4. `DATABASE_URL` doit être l’adresse poolée Neon. `DIRECT_URL` sert aux migrations.
-5. `NEXT_PUBLIC_SITE_URL` se lit dans l’environnement, sans slash final. En local : `http://localhost:3000`. En production : `https://deee.nexttechnologies.site`. Il faut la poser avant `npm run build`.
+4. `DATABASE_URL` est la seule adresse de la base, pour l’application et les migrations.
+5. L’image Docker ne contient aucune variable. Au démarrage sur le VPS, le conteneur lit le `.env` : `DATABASE_URL` vers `127.0.0.1` et `NEXT_PUBLIC_SITE_URL=https://deee.nexttechnologies.site`.
 6. Les nouveaux logos sont enregistrés en base et restent après un déploiement. Un logo déjà stocké dans `public/uploads` et absent du serveur s’affiche par le nom : il faut le renvoyer.

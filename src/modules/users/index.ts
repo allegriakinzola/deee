@@ -8,10 +8,6 @@ export type {
   UserAccess,
 } from "./contract"
 export { GVB_INVITABLE_ROLES, isGvbInvitableRole } from "./contract"
-export {
-  GVB_ADMIN_DISPLAY_NAME,
-  parseGvbAdminSeedInput,
-} from "./gvb-admin-profile"
 export { listDirectoryUsers } from "./list-users"
 export type { AdminDashboard } from "./get-admin-dashboard"
 export { getAdminDashboard } from "./get-admin-dashboard"

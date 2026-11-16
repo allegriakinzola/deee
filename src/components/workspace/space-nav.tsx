@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react"
 export type SpaceNavItem = {
   href: string
   label: string
+  shortLabel?: string
   icon: LucideIcon
   soon?: boolean
 }

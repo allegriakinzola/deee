@@ -14,6 +14,10 @@ import {
 
 import { deleteJson, patchJson, postJson } from "@/lib/api"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
+import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
 import { InvitePartnerMemberForm } from "@/components/partner/invite-partner-member-form"
 import {
   ACCESS_LABELS,
@@ -80,6 +84,7 @@ export function PartnerUsersWorkspace({
     () => filterPartnerUsers(users, filter, query),
     [users, filter, query]
   )
+  const paged = usePagedRows(visible, `${filter}|${query}`)
 
   function selectFilter(next: PartnerUsersViewFilter) {
     setFilter((current) => (current === next && next !== "all" ? "all" : next))
@@ -155,7 +160,7 @@ export function PartnerUsersWorkspace({
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
@@ -262,7 +267,7 @@ export function PartnerUsersWorkspace({
                   </td>
                 </tr>
               ) : (
-                visible.map((user) => {
+                paged.rows.map((user) => {
                   const isSelf = user.id === actorId
                   const busy = pendingId === user.id
                   return (
@@ -320,6 +325,15 @@ export function PartnerUsersWorkspace({
             </tbody>
           </table>
         </DirectoryTableScroll>
+        <DirectoryPagination
+          page={paged.page}
+          pageCount={paged.pageCount}
+          total={paged.total}
+          from={paged.from}
+          to={paged.to}
+          emptyLabel="0 compte"
+          onPage={paged.setPage}
+        />
       </section>
 
       <Sheet

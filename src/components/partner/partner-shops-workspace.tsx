@@ -16,6 +16,10 @@ import { deleteJson, patchJson, postJson } from "@/lib/api"
 import { displayShopCode } from "@/lib/shop-code"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
 import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
+import {
   CreateShopForm,
   type ShopCreated,
 } from "@/components/partner/create-shop-form"
@@ -75,6 +79,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
     () => filterShops(shops, filter, query),
     [shops, filter, query]
   )
+  const paged = usePagedRows(visible, `${filter}|${query}`)
 
   function selectFilter(next: ShopsViewFilter) {
     setFilter((current) => (current === next && next !== "all" ? "all" : next))
@@ -147,7 +152,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">
@@ -255,7 +260,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
                   </td>
                 </tr>
               ) : (
-                visible.map((shop) => {
+                paged.rows.map((shop) => {
                   const busy = pendingId === shop.id
                   return (
                     <tr
@@ -310,6 +315,15 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
             </tbody>
           </table>
         </DirectoryTableScroll>
+        <DirectoryPagination
+          page={paged.page}
+          pageCount={paged.pageCount}
+          total={paged.total}
+          from={paged.from}
+          to={paged.to}
+          emptyLabel="0 shop"
+          onPage={paged.setPage}
+        />
       </section>
 
       <Sheet
@@ -319,7 +333,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
           if (!open) setCreated(null)
         }}
       >
-        <SheetContent side="right" className="w-full sm:max-w-md" showCloseButton>
+        <SheetContent side="right" className="w-full sm:max-w-lg" showCloseButton>
           <SheetHeader className="border-b border-border/80">
             <SheetTitle>{created ? "Shop créé" : "Créer un shop"}</SheetTitle>
             <SheetDescription>
@@ -329,7 +343,7 @@ export function PartnerShopsWorkspace({ shops }: { shops: DirectoryShop[] }) {
                     ? "Le compte du shop a reçu un e-mail d’activation."
                     : "L’e-mail n’a pas pu partir. Copiez le lien."
                   : "Le shop est enregistré. Créez le compte quand vous serez prêt."
-                : "Nom, commune, position. Un seul login, facultatif à la création."}
+                : "Le nom et la commune, puis l’endroit sur la carte."}
             </SheetDescription>
           </SheetHeader>
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">

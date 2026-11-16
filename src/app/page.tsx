@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Suspense } from "react"
 
+export const dynamic = "force-dynamic"
+
 export default async function Home() {
   const directory = await listPublicDirectory()
 

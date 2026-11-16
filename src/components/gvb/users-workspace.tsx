@@ -16,6 +16,10 @@ import {
 
 import { deleteJson, patchJson, postJson } from "@/lib/api"
 import { DirectoryTableScroll } from "@/components/directory/list-layout"
+import {
+  DirectoryPagination,
+  usePagedRows,
+} from "@/components/directory/pagination"
 import { InviteUserForm, type InviteCreated } from "@/components/gvb/invite-user-form"
 import {
   ACCESS_LABELS,
@@ -144,7 +148,7 @@ export function UsersWorkspace({
   }
 
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8">
+    <div className="min-w-0 w-full space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-800/75 uppercase">

@@ -1,6 +1,10 @@
 import "server-only"
 
-import { mergeDailySeries, mergeRecent } from "@/lib/dashboard"
+import {
+  ACTIVITY_HISTORY_DAYS,
+  mergeDailySeries,
+  mergeRecent,
+} from "@/lib/dashboard"
 import { canAccessCitizenSpace } from "@/modules/access"
 import type { AuthUser } from "@/modules/auth"
 import { getCitizenBalance } from "@/modules/ledger"
@@ -24,6 +28,9 @@ export type CitizenDashboard = {
   confirmedDeposits30: number
   pointsCredited30: number
   confirmedRedeems30: number
+  rejectedDeposits30: number
+  rejectedRedeems30: number
+  pointsDebited30: number
   bons30: number
   usd30: string
   daily: Array<{
@@ -35,6 +42,7 @@ export type CitizenDashboard = {
     pointsOut: number
   }>
   topMaterials: Array<{ name: string; quantity: number; points: number }>
+  shops: Array<{ name: string; confirmed: number; points: number }>
   rewards: Array<{ label: string; count: number; bons: number; usd: string }>
   recent: Array<{
     id: string
@@ -57,8 +65,14 @@ export async function getCitizenDashboard(
   const [balance, quote, deposits, redeems] = await Promise.all([
     getCitizenBalance(actor),
     getCitizenRedeemQuote(actor),
-    summarizeDeposits({ citizenId: actor.id }),
-    summarizeRedeems({ citizenId: actor.id }),
+    summarizeDeposits(
+      { citizenId: actor.id },
+      { historyDays: ACTIVITY_HISTORY_DAYS }
+    ),
+    summarizeRedeems(
+      { citizenId: actor.id },
+      { historyDays: ACTIVITY_HISTORY_DAYS }
+    ),
   ])
 
   return {
@@ -72,10 +86,22 @@ export async function getCitizenDashboard(
     confirmedDeposits30: deposits.confirmed30,
     pointsCredited30: deposits.pointsCredited30,
     confirmedRedeems30: redeems.confirmed30,
+    rejectedDeposits30: deposits.rejected30,
+    rejectedRedeems30: redeems.rejected30,
+    pointsDebited30: redeems.pointsDebited30,
     bons30: redeems.bons30,
     usd30: redeems.usd30.toFixed(2),
-    daily: mergeDailySeries(deposits.daily, redeems.daily),
+    daily: mergeDailySeries(
+      deposits.daily,
+      redeems.daily,
+      ACTIVITY_HISTORY_DAYS
+    ),
     topMaterials: deposits.topMaterials,
+    shops: deposits.byShop.slice(0, 6).map((shop) => ({
+      name: shop.name,
+      confirmed: shop.confirmed,
+      points: shop.points,
+    })),
     rewards: redeems.rewards.map((item) => ({
       label: item.label,
       count: item.count,

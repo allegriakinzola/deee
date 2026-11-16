@@ -1,16 +1,120 @@
 import Link from "next/link"
-import type { LucideIcon } from "lucide-react"
+
+import { CitizenPageHeader, CitizenSection } from "@/components/citizen/citizen-page"
 import {
+  ChevronRightIcon,
   MapPinIcon,
   RecycleIcon,
   SmartphoneIcon,
   SparklesIcon,
 } from "lucide-react"
 
-import { PeriodChart } from "@/components/dashboard/period-chart"
+import { ActivityChart } from "@/components/dashboard/activity-chart"
+import { RankChart } from "@/components/dashboard/rank-chart"
+import { ShareChart } from "@/components/dashboard/share-chart"
+import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { formatUsd } from "@/lib/money"
+import { formatDateTimeKinshasa } from "@/lib/period"
 import type { PublicShop } from "@/lib/public-directory"
+import { cn } from "@/lib/utils"
 import type { CitizenDashboard } from "@/modules/deposits"
+
+function phrase(count: number, one: string, many: string) {
+  return `${count} ${count === 1 ? one : many}`
+}
+
+function FlowBar({
+  parts,
+}: {
+  parts: Array<{ label: string; value: number; color: string }>
+}) {
+  const total = parts.reduce((sum, part) => sum + part.value, 0)
+  return (
+    <div>
+      <div className="flex h-3 gap-1 overflow-hidden rounded-full bg-muted p-0.5">
+        {total === 0
+          ? null
+          : parts.map((part) =>
+              part.value === 0 ? null : (
+                <div
+                  key={part.label}
+                  className="rounded-full"
+                  style={{
+                    flexGrow: part.value,
+                    background: part.color,
+                  }}
+                />
+              )
+            )}
+      </div>
+      <ul className="mt-3 space-y-1.5 text-sm">
+        {parts.map((part) => (
+          <li key={part.label} className="flex items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="size-2.5 rounded-full"
+                style={{ background: part.color }}
+              />
+              {part.label}
+            </span>
+            <span className="font-medium">{part.value}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function MetricLink({
+  href,
+  label,
+  value,
+  hint,
+  tone = "plain",
+}: {
+  href: string
+  label: string
+  value: string
+  hint: string
+  tone?: "lead" | "plain" | "alert"
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "rounded-2xl px-5 py-5 ring-1",
+        tone === "lead" && "bg-primary text-primary-foreground ring-primary",
+        tone === "plain" && "bg-card ring-foreground/10",
+        tone === "alert" && "bg-amber-50 ring-amber-200"
+      )}
+    >
+      <p
+        className={cn(
+          "text-xs font-medium tracking-wide uppercase",
+          tone === "lead" ? "text-primary-foreground/75" : "text-muted-foreground"
+        )}
+      >
+        {label}
+      </p>
+      <p className="mt-3 text-3xl font-semibold tracking-tight">{value}</p>
+      <p
+        className={cn(
+          "mt-2 text-sm",
+          tone === "lead" ? "text-primary-foreground/80" : "text-muted-foreground"
+        )}
+      >
+        {hint}
+      </p>
+    </Link>
+  )
+}
 
 export function CitizenHome({
   displayName,
@@ -21,285 +125,374 @@ export function CitizenHome({
   data: CitizenDashboard
   nearest: PublicShop | null
 }) {
-  const {
-    points,
-    availablePoints,
-    bonsAvailable,
-    pointsPerBon,
-    lastDeposit,
-  } = data
   const firstName = displayName.trim().split(/\s+/)[0] || displayName
-  const pointsToBon = Math.max(0, pointsPerBon - availablePoints)
+  const waiting = data.pendingDeposits + data.pendingRedeems
+  const pointsToBon = Math.max(0, data.pointsPerBon - data.availablePoints)
+  const balanceHint =
+    data.points === 0
+      ? "Déposez un appareil en shop pour créditer votre compte."
+      : data.bonsAvailable < 1
+        ? `Encore ${phrase(pointsToBon, "point", "points")} pour 1 bon.`
+        : `${phrase(data.bonsAvailable, "bon", "bons")} à échanger en shop.`
+
+  const actions = [
+    {
+      href: "/compte/depot",
+      icon: RecycleIcon,
+      label: "Déposer",
+      hint: "Choisir les appareils et envoyer au shop",
+    },
+    {
+      href: "/compte/echange",
+      icon: SparklesIcon,
+      label: "Échanger",
+      hint: "Utiliser vos bons contre une offre",
+    },
+    {
+      href: "/compte/catalogue",
+      icon: SmartphoneIcon,
+      label: "Catalogue",
+      hint: "Voir les points de chaque appareil",
+    },
+    {
+      href: "/compte/shops",
+      icon: MapPinIcon,
+      label: "Shops",
+      hint: "Trouver un point de dépôt à Kinshasa",
+    },
+  ] as const
 
   return (
-    <div className="flex flex-col gap-3 pb-1 lg:gap-6">
-      <section className="rounded-2xl bg-primary px-4 py-4 text-primary-foreground lg:px-8 lg:py-6">
-        <p className="text-[11px] font-medium tracking-wide uppercase lg:text-xs">
-          Mon solde
-        </p>
-        <p className="mt-3 text-3xl font-semibold tracking-tight lg:text-4xl">
-          {points} pts
-        </p>
-        <p className="mt-2 text-[13px] opacity-80 lg:text-sm">
-          {points === 0
-            ? `Déposez un appareil en shop pour créditer votre compte, ${firstName}.`
-            : bonsAvailable < 1
-              ? `Encore ${pointsToBon} pts pour 1 bon, ${firstName}.`
-              : `${bonsAvailable} bon${bonsAvailable === 1 ? "" : "s"} à échanger en shop, ${firstName}.`}
-        </p>
-      </section>
+    <div className="flex flex-col gap-8 pb-2 lg:gap-10">
+      <CitizenPageHeader
+        title={`Mbote, ${firstName}`}
+        description="Le solde est celui d’aujourd’hui. Les indicateurs portent sur 30 jours. Le graphique d’activité remonte jusqu’à un an."
+      />
 
-      <div className="grid grid-cols-4 gap-2 lg:gap-4">
-        <QuickAction href="/compte/depot" icon={RecycleIcon} label="Déposer" />
-        <QuickAction href="/compte/shops" icon={MapPinIcon} label="Shops" />
-        <QuickAction href="/compte/catalogue" icon={SmartphoneIcon} label="Catalogue" />
-        <QuickAction href="/compte/echange" icon={SparklesIcon} label="Échanger" />
+      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8">
+        <div className="order-2 flex flex-col gap-8 lg:order-1 lg:gap-10">
+
+      <CitizenSection
+        eyebrow="Aujourd’hui"
+        title="Votre situation"
+        description="Le solde est actuel. Les trois autres chiffres portent sur 30 jours."
+      >
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricLink
+          href="/compte/depot"
+          label="Solde"
+          value={`${data.points} pts`}
+          hint={balanceHint}
+          tone="lead"
+        />
+        <MetricLink
+          href="/compte/depot"
+          label="Points gagnés"
+          value={String(data.pointsCredited30)}
+          hint={phrase(
+            data.confirmedDeposits30,
+            "dépôt confirmé",
+            "dépôts confirmés"
+          )}
+        />
+        <MetricLink
+          href="/compte/echange"
+          label="Valeur reçue"
+          value={formatUsd(data.usd30)}
+          hint={
+            data.bons30 === 1
+              ? "1 bon confirmé"
+              : `${data.bons30} bons confirmés`
+          }
+        />
+        <MetricLink
+          href={data.pendingDeposits > 0 ? "/compte/depot" : "/compte/echange"}
+          label="En attente du shop"
+          value={String(waiting)}
+          hint={`${phrase(data.pendingDeposits, "dépôt", "dépôts")} · ${phrase(data.pendingRedeems, "échange", "échanges")}`}
+          tone={waiting > 0 ? "alert" : "plain"}
+        />
       </div>
 
-      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-6">
-        <section className="rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-5">
-          <p className="text-sm font-semibold text-zinc-900 lg:text-base">
-            Dernier dépôt
+      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-zinc-100 pt-4 sm:grid-cols-4">
+        <Link
+          href="/compte/echange"
+          className="rounded-2xl bg-card px-4 py-3.5 ring-1 ring-foreground/10"
+        >
+          <p className="text-xs text-muted-foreground">Échanges confirmés</p>
+          <p className="mt-1 text-lg font-semibold">{data.confirmedRedeems30}</p>
+        </Link>
+        <Link
+          href="/compte/echange"
+          className="rounded-2xl bg-card px-4 py-3.5 ring-1 ring-foreground/10"
+        >
+          <p className="text-xs text-muted-foreground">Points utilisés</p>
+          <p className="mt-1 text-lg font-semibold">{data.pointsDebited30}</p>
+        </Link>
+        <Link
+          href="/compte/depot"
+          className="rounded-2xl bg-card px-4 py-3.5 ring-1 ring-foreground/10"
+        >
+          <p className="text-xs text-muted-foreground">Refus</p>
+          <p className="mt-1 text-lg font-semibold">
+            {data.rejectedDeposits30 + data.rejectedRedeems30}
           </p>
-          <div className="mt-3 flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/50 text-primary-foreground lg:size-12">
-              <RecycleIcon className="size-5 lg:size-6" />
-            </span>
-            {lastDeposit ? (
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-zinc-900 lg:text-base">
-                  {lastDeposit.shopName}
-                </p>
-                <p className="text-[12px] text-zinc-500 lg:text-sm">
-                  +{lastDeposit.points} pts
-                </p>
-              </div>
+        </Link>
+        <div className="rounded-2xl bg-zinc-50 px-4 py-3.5 ring-1 ring-zinc-200/80">
+          <p className="text-xs text-muted-foreground">Points pour 1 bon</p>
+          <p className="mt-1 text-lg font-semibold">{data.pointsPerBon}</p>
+        </div>
+      </div>
+      </CitizenSection>
+
+      <CitizenSection
+        eyebrow="Activité"
+        title="Dépôts, échanges et points"
+        description="Chaque jour, chaque semaine ou chaque mois, jusqu’à un an."
+      >
+        <ActivityChart points={data.daily} />
+      </CitizenSection>
+
+      <CitizenSection
+        eyebrow="30 jours"
+        title="Le détail"
+        description="Matériels, offres reçues, shops et le suivi des statuts."
+      >
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ce que j’ai déposé</CardTitle>
+            <CardDescription>Quantités confirmées sur 30 jours</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RankChart
+              items={data.topMaterials.map((item) => ({
+                label: item.name,
+                value: item.quantity,
+                detail: `${item.quantity} · ${item.points} pts`,
+              }))}
+              empty="Aucun dépôt confirmé sur la période."
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ce que j’ai reçu</CardTitle>
+            <CardDescription>Échanges confirmés sur 30 jours</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ShareChart
+              center="échanges"
+              items={data.rewards.map((item) => ({
+                label: item.label,
+                value: item.count,
+              }))}
+              empty="Aucun échange confirmé sur la période."
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Dépôts</CardTitle>
+            <CardDescription>En attente, confirmés et refusés</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FlowBar
+              parts={[
+                {
+                  label: "En attente",
+                  value: data.pendingDeposits,
+                  color: "oklch(0.72 0.12 85)",
+                },
+                {
+                  label: "Confirmés",
+                  value: data.confirmedDeposits30,
+                  color: "oklch(0.46 0.11 152)",
+                },
+                {
+                  label: "Refusés",
+                  value: data.rejectedDeposits30,
+                  color: "oklch(0.62 0.16 25)",
+                },
+              ]}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Échanges</CardTitle>
+            <CardDescription>En attente, confirmés et refusés</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FlowBar
+              parts={[
+                {
+                  label: "En attente",
+                  value: data.pendingRedeems,
+                  color: "oklch(0.72 0.12 85)",
+                },
+                {
+                  label: "Confirmés",
+                  value: data.confirmedRedeems30,
+                  color: "oklch(0.46 0.11 152)",
+                },
+                {
+                  label: "Refusés",
+                  value: data.rejectedRedeems30,
+                  color: "oklch(0.62 0.16 25)",
+                },
+              ]}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Shops où j’ai déposé</CardTitle>
+            <CardDescription>Dépôts confirmés sur 30 jours</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RankChart
+              items={data.shops.map((shop) => ({
+                label: shop.name,
+                value: shop.confirmed,
+                detail: `${shop.confirmed} · ${shop.points} pts`,
+              }))}
+              empty="Aucun shop sur la période."
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Prochain shop</CardTitle>
+            <CardDescription>
+              {data.lastDeposit
+                ? `Dernier dépôt confirmé : ${data.lastDeposit.shopName}, +${data.lastDeposit.points} pts`
+                : "Aucun dépôt confirmé pour l’instant"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {nearest ? (
+              <Link
+                href={`https://www.google.com/maps?q=${nearest.lat},${nearest.lng}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 rounded-2xl bg-muted/50 px-4 py-4"
+              >
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <MapPinIcon className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{nearest.name}</span>
+                  <span className="block truncate text-sm text-muted-foreground">
+                    {nearest.area}
+                  </span>
+                </span>
+                <span className="text-sm font-semibold text-emerald-800">
+                  Y aller
+                </span>
+              </Link>
             ) : (
-              <p className="text-sm text-zinc-500 lg:text-base">
-                Aucun dépôt confirmé pour l’instant.
+              <p className="text-sm text-muted-foreground">
+                Aucun shop actif pour le moment.
               </p>
             )}
-          </div>
-        </section>
+          </CardContent>
+        </Card>
+      </div>
+      </CitizenSection>
+        </div>
 
-        {nearest ? (
-          <Link
-            href={`https://www.google.com/maps?q=${nearest.lat},${nearest.lng}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-3 rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-5"
-          >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/50 text-primary-foreground lg:size-12">
-              <MapPinIcon className="size-5 lg:size-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium leading-tight text-zinc-900 lg:text-base">
-                Un shop ouvert
-              </p>
-              <p className="truncate text-[12px] text-zinc-500 lg:text-sm">
-                {nearest.name} · {nearest.area}
-              </p>
-            </div>
-            <span className="text-[13px] font-semibold text-emerald-800 lg:text-sm">
-              Y aller
-            </span>
-          </Link>
-        ) : (
-          <p className="rounded-2xl bg-white px-3.5 py-3 text-sm text-zinc-500 lg:px-5 lg:py-5">
-            Aucun shop actif pour le moment.
-          </p>
-        )}
+        <aside className="order-1 lg:sticky lg:top-0 lg:order-2">
+          <CitizenSection eyebrow="Actions" title="Que voulez-vous faire ?">
+            <ul className="-mx-2 divide-y divide-zinc-100">
+              {actions.map((action) => {
+                const Icon = action.icon
+                return (
+                  <li key={action.href}>
+                    <Link
+                      href={action.href}
+                      className="flex items-center gap-3 rounded-xl px-2 py-3 hover:bg-zinc-50"
+                    >
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800">
+                        <Icon className="size-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-zinc-950">
+                          {action.label}
+                        </span>
+                        <span className="mt-0.5 block text-sm text-zinc-500">
+                          {action.hint}
+                        </span>
+                      </span>
+                      <ChevronRightIcon className="size-4 shrink-0 text-zinc-400" />
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </CitizenSection>
+        </aside>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <MiniStat
-          label="Dépôts en attente"
-          value={String(data.pendingDeposits)}
-          href="/compte/depot"
-        />
-        <MiniStat
-          label="Échanges en attente"
-          value={String(data.pendingRedeems)}
-          href="/compte/echange"
-        />
-        <MiniStat
-          label="Dépôts (30 j)"
-          value={String(data.confirmedDeposits30)}
-          hint={`${data.pointsCredited30} pts`}
-          href="/compte/depot"
-        />
-        <MiniStat
-          label="Échanges (30 j)"
-          value={String(data.confirmedRedeems30)}
-          hint={`${data.bons30} bon${data.bons30 === 1 ? "" : "s"} · ${formatUsd(data.usd30)}`}
-          href="/compte/echange"
-        />
-      </div>
-
-      <section className="rounded-2xl bg-white px-3.5 py-4 lg:px-5 lg:py-5">
-        <PeriodChart points={data.daily} />
-      </section>
-
-      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-6">
-        <CitizenTable
-          title="Mes matériels"
-          empty="Aucun dépôt confirmé sur 30 jours."
-          headers={["Article", "Qté", "Pts"]}
-          rows={data.topMaterials.map((item) => [
-            item.name,
-            String(item.quantity),
-            String(item.points),
-          ])}
-        />
-        <CitizenTable
-          title="Mes échanges"
-          empty="Aucun échange confirmé sur 30 jours."
-          headers={["Objet", "Nb", "USD"]}
-          rows={data.rewards.map((item) => [
-            item.label,
-            String(item.count),
-            formatUsd(item.usd),
-          ])}
-        />
-      </div>
-
-      <CitizenTable
+      <CitizenSection
+        eyebrow="Historique"
         title="Dernières opérations"
-        empty="Pas encore d’historique sur 30 jours."
-        headers={["Opération", "Shop", "Pts"]}
-        rows={data.recent.map((item) => [
-          `${item.title} · ${item.status === "CONFIRMED" ? "Confirmé" : "Refusé"}`,
-          item.shopName ?? "—",
-          String(item.points),
-        ])}
-      />
-    </div>
-  )
-}
-
-function MiniStat({
-  label,
-  value,
-  hint,
-  href,
-}: {
-  label: string
-  value: string
-  hint?: string
-  href?: string
-}) {
-  const body = (
-    <>
-      <p className="text-[11px] text-zinc-500 lg:text-xs">{label}</p>
-      <p className="mt-1 text-xl font-semibold tracking-tight text-zinc-900 lg:text-2xl">
-        {value}
-      </p>
-      {hint ? <p className="mt-1 text-[11px] text-zinc-500">{hint}</p> : null}
-    </>
-  )
-  if (href) {
-    return (
-      <Link href={href} className="rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-4">
-        {body}
-      </Link>
-    )
-  }
-  return (
-    <div className="rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-4">{body}</div>
-  )
-}
-
-function CitizenTable({
-  title,
-  empty,
-  headers,
-  rows,
-}: {
-  title: string
-  empty: string
-  headers: string[]
-  rows: string[][]
-}) {
-  return (
-    <section className="rounded-2xl bg-white px-3.5 py-3 lg:px-5 lg:py-5">
-      <p className="text-sm font-semibold text-zinc-900 lg:text-base">{title}</p>
-      {rows.length === 0 ? (
-        <p className="mt-3 text-sm text-zinc-500">{empty}</p>
-      ) : (
-        <table className="mt-3 w-full text-sm">
-          <thead className="text-left text-[11px] text-zinc-500">
-            <tr>
-              {headers.map((header, index) => (
-                <th
-                  key={header}
-                  className={index === 0 ? "pb-2 font-medium" : "pb-2 text-right font-medium"}
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.join("|")} className="border-t border-zinc-100">
-                {row.map((cell, index) => (
-                  <td
-                    key={`${headers[index]}-${cell}`}
-                    className={index === 0 ? "py-2" : "py-2 text-right"}
-                  >
-                    {cell}
-                  </td>
+        description="Confirmations et refus les plus récents."
+      >
+          {data.recent.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Pas encore d’historique.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-muted-foreground">
+                <tr>
+                  <th className="pb-2 font-medium">Opération</th>
+                  <th className="hidden pb-2 font-medium sm:table-cell">Shop</th>
+                  <th className="hidden pb-2 font-medium md:table-cell">Quand</th>
+                  <th className="pb-2 text-right font-medium">Points</th>
+                  <th className="pb-2 text-right font-medium">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.recent.map((item) => (
+                  <tr key={item.id} className="border-t border-border/60">
+                    <td className="py-2.5">
+                      <p>{item.title}</p>
+                      <p className="text-xs text-muted-foreground sm:hidden">
+                        {item.shopName ?? "—"}
+                      </p>
+                    </td>
+                    <td className="hidden py-2.5 sm:table-cell">
+                      {item.shopName ?? "—"}
+                    </td>
+                    <td className="hidden py-2.5 text-muted-foreground md:table-cell">
+                      {formatDateTimeKinshasa(new Date(item.at))}
+                    </td>
+                    <td className="py-2.5 text-right tabular-nums">
+                      {item.points}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <Badge
+                        variant={
+                          item.status === "CONFIRMED" ? "default" : "secondary"
+                        }
+                      >
+                        {item.status === "CONFIRMED" ? "Confirmé" : "Refusé"}
+                      </Badge>
+                    </td>
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </section>
-  )
-}
-
-function QuickAction({
-  href,
-  icon: Icon,
-  label,
-  soon = false,
-}: {
-  href?: string
-  icon: LucideIcon
-  label: string
-  soon?: boolean
-}) {
-  const content = (
-    <>
-      <span className="flex size-11 items-center justify-center rounded-xl bg-primary/50 text-primary-foreground lg:size-14">
-        <Icon className="size-5 lg:size-6" />
-      </span>
-      <span className="text-[11px] font-medium text-zinc-600 lg:text-sm">
-        {label}
-      </span>
-      {soon ? (
-        <span className="text-[9px] font-medium tracking-wide text-zinc-400 uppercase lg:text-[10px]">
-          Bientôt
-        </span>
-      ) : null}
-    </>
-  )
-
-  if (!href || soon) {
-    return (
-      <span className="flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 text-zinc-400 lg:gap-2 lg:py-5">
-        {content}
-      </span>
-    )
-  }
-
-  return (
-    <Link
-      href={href}
-      className="flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 lg:gap-2 lg:py-5"
-    >
-      {content}
-    </Link>
+              </tbody>
+            </table>
+          )}
+      </CitizenSection>
+    </div>
   )
 }
